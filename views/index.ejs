@@ -1,0 +1,49 @@
+<% include partials/header.ejs %>
+
+  <div class="jumbotron">
+    <h1><i class="fab fa-twitter"></i> Account Activity Dashboard</h1>
+    <p>A sample application to demonstrate webhook and subscription management.
+    This app uses the enterprise Account Activity API.<br/>
+    Full API reference can be found on developer.twitter.com
+<a href="https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/api-reference" target="_blank">here</a>.</p>
+    <hr>
+    <ul id="home-menu">
+      <li>
+        <a href="/webhook"><h5><i class="fas fa-cog"></i> Manage Webhook</h5></a>
+        <p>Create, update, delete and validate webhook configurations.</p>
+      </li>
+      <li>
+        <a href="/subscriptions"><h5><i class="fas fa-address-book"></i> Manage Subscriptions</h5></a>
+        <p>Add and remove Twitter user subscriptions.</p>
+      </li>
+      <li>
+        <a href="/activity"><h5><i class="fas fa-bolt"></i> Live Activity</h5></a>
+        <p>View live incoming Account Activity events for all users subscribed to.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <h5 class="card-header"><i class="fas fa-question-circle"></i> Production Considerations</h5>
+        <div class="card-body">
+          <p>This app is for demonstration purposes only and should not be used in
+          production without further modifcations. Dependencies on databases, and other
+          types of services are purposley not within the scope of this app.
+          Some considerations below:</p>
+          <ul>
+            <li>User information is stored in server side sessions. This may not provide
+            the best user experience or be the best solution for your usecase, espcially
+            if you are adding more functionality.</li>
+            <li>The application can handle light usage, but you may experience API rate
+            limit issues under heavier usage. Consider storing data locally in a secure database
+            or caching requests.</li>
+            <li>Specifc pages are only protected by basic auth. To support multiple users
+            (admins, team members, customers, etc) consider implementing a form of Access Control List.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+</div>
+<% include partials/footer.ejs %>

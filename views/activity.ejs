@@ -1,0 +1,51 @@
+<% include partials/header.ejs %>
+
+<div class="row">
+  <div id="event-container" class="col-sm-12">
+    
+    <!-- Intro message -->
+    <div id="about-msg" class="card">
+      <h3 class="card-header"><i class="fas fa-bolt"></i> Live Activity</h3>
+      <div class="json-event card-body">
+        <p>Account Activity events sent to your webhook will be displayed here when received in real-time. Events will be received for all <a href="/subscriptions">user subscriptions</a>.</p>
+        <div class="alert alert-primary" role="alert"><strong>Note:</strong> Navigating away from this page will clear all events currently displayed.</div>
+      </div>
+      <div class="card-footer">
+        <button  class="btn btn-secondary copy-btn" onclick="activity.dismiss_about_msg()"><i class="fas fa-times-circle"></i> Dismiss</button>
+      </div>
+    </div>
+
+    <!-- Waiting message -->
+    <div id="waiting-msg" class="card">
+      <div class="card-body">
+        <i class="fas fa-clock"></i> Waiting for activity . . .
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- JSON template -->
+<script id="json_template" type="text/x-handlebars-template"> 
+  <div class="card">
+    <div id="json-header-{{internal_id}}" class="card-header text-right text-muted">
+      <i title="Highlight" class="fas fa-bookmark icon-btn" onclick="activity.mark('{{internal_id}}')"></i>&nbsp;
+      <i title="Copy" class="fas fa-copy icon-btn" onclick="activity.copy_json('{{internal_id}}')"></i>&nbsp;
+      <i id="max-btn-{{internal_id}}" title="Expand" class="fas fa-window-maximize icon-btn" onclick="activity.expand('{{internal_id}}')"></i>
+      <i id="min-btn-{{internal_id}}" title="Minimize" class="fas fa-window-minimize icon-btn" onclick="activity.expand('{{internal_id}}')"></i>
+    </div>
+    <div class="json-event card-body">
+      <textarea id="json-str-{{internal_id}}" class="form-control" disabled>{{json_str}}</textarea>
+    </div>
+  </div>
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascript/activity.js"></script>
+
+<script>
+  activity.connect('<%= socket_host  %>', '<%= activity_event  %>');
+</script>
+
+<% include partials/footer.ejs %>
