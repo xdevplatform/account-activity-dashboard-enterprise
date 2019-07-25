@@ -19,8 +19,6 @@ auth.twitter_oauth = {
   token_secret: nconf.get('TWITTER_ACCESS_TOKEN_SECRET')
 }
 auth.twitter_webhook_environment = nconf.get('TWITTER_WEBHOOK_ENV')
-auth.twitter_webhook_id = nconf.get('TWITTER_WEBHOOK_ID')
-
 
 // basic auth middleware for express
 auth.basic = httpAuth.connect(httpAuth.basic({
@@ -131,13 +129,32 @@ auth.get_twitter_bearer_token = function () {
       }
       else {
         var json_body = JSON.parse(response.body)
-        console.log("Bearer Token:", json_body.access_token)
         auth.twitter_bearer_token = json_body.access_token
+        console.log('auth.twitter_bearer_token', auth.twitter_bearer_token)
         resolve(auth.twitter_bearer_token)
       }
     })
   })
 }
 
+auth.get_webhook_id = function (bearer_token) {
+  var request_options = {
+    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+    method: 'GET',
+    auth: { 'bearer' : bearer_token }
+  }
+
+  return new Promise (function (resolve, reject) {
+    request(request_options, function(error, response) {
+      if (error) {
+        reject(error)
+      } else {
+        const json_response = JSON.parse(response.body)
+        auth.webhook_id = json_response[0].id
+        resolve(auth.webhook_id)
+      }
+    })
+  })
+}
 
 module.exports = auth

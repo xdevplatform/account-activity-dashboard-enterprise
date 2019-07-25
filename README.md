@@ -38,7 +38,7 @@ Enterprise Account Activity API differs from the Premium Account Activity API in
     npm install
     ```
 
-3. Create a new `config.json` file based on `config.sample.json` and fill in your Twitter keys, tokens and webhook id. Twitter keys and access tokens are found on your app page on [apps.twitter.com](https://apps.twitter.com/). The basic auth properties can be anything you want, and are used for simple password protection to access the configuration UI.
+3. Create a new `config.json` file based on `config.sample.json` and fill in your Twitter keys and tokens. Twitter keys and access tokens are found on your app page on [apps.twitter.com](https://apps.twitter.com/). The basic auth properties can be anything you want, and are used for simple password protection to access the configuration UI.
 
 4. Run locally:
 
@@ -125,7 +125,7 @@ These scripts should be executed from root of the project folder. Your url or we
 **Note:** The free tier of Heroku will put your app to sleep after 30 minutes. On cold start, you app will have very high latency which may result in a CRC failure that deactivates your webhook. To trigger a challenge response request and re-validate, run the following script.
 
 ```bash
-node example_scripts/webhook_management/validate-webhook-config.js 
+node example_scripts/webhook_management/validate-webhook-config.js
 -i <webhook_id>
 ```
 

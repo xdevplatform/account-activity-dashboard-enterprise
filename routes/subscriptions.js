@@ -1,5 +1,6 @@
 const request = require('request-promise')
 const auth = require('../helpers/auth.js')
+const webhook_view = require('./webhook.js')
 
 
 module.exports = function (req, response) {
@@ -7,19 +8,21 @@ module.exports = function (req, response) {
   var json_response
 
   // get list of subs
-  auth.get_twitter_bearer_token().then(function (bearer_token) {
-    saved_bearer_token = bearer_token
-    var request_options = {
-      url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + auth.twitter_webhook_id + '/subscriptions/all/list.json',
-      auth: {
-        'bearer': saved_bearer_token
+  auth.get_twitter_bearer_token()
+    .then(function(bearer_token) {
+      saved_bearer_token = bearer_token
+      return auth.get_webhook_id(bearer_token)
+    })
+    .then(webhook_id => {
+      var request_options = {
+        url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all/list.json',
+        auth: {
+          'bearer': saved_bearer_token
+        }
       }
-    }
 
-    return request.get(request_options)
-
-  })
-
+      return request.get(request_options)
+    })
   // hydrate user objects from IDs
   .then(function (body) {
     var json_body = json_response = JSON.parse(body)
