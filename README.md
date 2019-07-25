@@ -1,6 +1,6 @@
 # account-activity-dashboard-enterprise
 
-Sample web app and helper scripts to get started with Twitter's premium Account Activity API (All Activities). Written in Node.js. Full documentation for this API can be found on the [Account Activity API reference](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview).
+Sample web app and helper scripts to get started with Twitter's enterprise Account Activity API (All Activities). Written in Node.js. Full documentation for this API can be found on the [Account Activity API reference](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview).
 
 Enterprise Account Activity API differs from the Premium Account Activity API in the following ways
 * Request a redelivery of events, up to the past five days, through the Enterprise Account Activity Replay API
