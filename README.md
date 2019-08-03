@@ -42,7 +42,7 @@ Enterprise Account Activity API differs from the Premium Account Activity API in
 
    ```bash
    TWITTER_CONSUMER_KEY= # your consumer key
-   TWITTER_CONSUMER_SECRET= # your consimer secret
+   TWITTER_CONSUMER_SECRET= # your consumer secret
    TWITTER_ACCESS_TOKEN= # your access token
    TWITTER_ACCESS_TOKEN_SECRET= # your access token secret
    BASIC_AUTH_USER= # your basic auth user
@@ -86,7 +86,7 @@ Load the web app in your browser and follow the instructions below.
 
 ### Using the command line example scripts
 
-These scripts should be executed from root of the project folder. Your environment, url or webhook ID should be passed in as command line arguments.
+These scripts should be executed from root of the project folder. Your url or webhook ID should be passed in as command line arguments.
 
 1. Create webhook config.
 
