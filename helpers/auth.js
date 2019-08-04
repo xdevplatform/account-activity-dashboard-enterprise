@@ -148,7 +148,6 @@ auth.get_twitter_bearer_token = function () {
       else {
         var json_body = JSON.parse(response.body)
         auth.twitter_bearer_token = json_body.access_token
-        console.log('auth.twitter_bearer_token', auth.twitter_bearer_token)
         resolve(auth.twitter_bearer_token)
       }
     })
