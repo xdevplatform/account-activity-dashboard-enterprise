@@ -147,7 +147,6 @@ auth.get_twitter_bearer_token = function () {
       }
       else {
         var json_body = JSON.parse(response.body)
-        console.log("Bearer Token:", json_body.access_token)
         auth.twitter_bearer_token = json_body.access_token
         resolve(auth.twitter_bearer_token)
       }
@@ -155,5 +154,24 @@ auth.get_twitter_bearer_token = function () {
   })
 }
 
+auth.get_webhook_id = function (bearer_token) {
+  var request_options = {
+    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+    method: 'GET',
+    auth: { 'bearer' : bearer_token }
+  }
+
+  return new Promise (function (resolve, reject) {
+    request(request_options, function(error, response) {
+      if (error) {
+        reject(error)
+      } else {
+        const json_response = JSON.parse(response.body)
+        auth.webhook_id = json_response[0].id
+        resolve(auth.webhook_id)
+      }
+    })
+  })
+}
 
 module.exports = auth

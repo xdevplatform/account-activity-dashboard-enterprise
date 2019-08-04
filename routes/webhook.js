@@ -213,19 +213,21 @@ webhook.delete_config = function (req, resp) {
  */
  webhook.replay_config = function (req, resp) {
 
+   var saved_bearer_token;
    const FROM_DATE = moment(req.body.startdate.toString()).format('YYYYMMDDHHmm')
    const TO_DATE = moment(req.body.enddate.toString()).format('YYYYMMDDHHmm')
 
    auth.get_twitter_bearer_token()
-
-   // validate webhook config
    .then(function (bearer_token) {
-
+     saved_bearer_token = bearer_token
+     return auth.get_webhook_id(bearer_token)
+   })
+   .then(webhook_id => {
      // request options
      var request_options = {
-       url: 'https://api.twitter.com/1.1/account_activity/replay/webhooks/' + auth.twitter_webhook_id + '/subscriptions/all.json?from_date=' + FROM_DATE + '&to_date=' + TO_DATE,
+       url: 'https://api.twitter.com/1.1/account_activity/replay/webhooks/' + webhook_id + '/subscriptions/all.json?from_date=' + FROM_DATE + '&to_date=' + TO_DATE,
        auth: {
-         'bearer': bearer_token
+         'bearer': saved_bearer_token
        }
      }
 
