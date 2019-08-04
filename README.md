@@ -135,9 +135,7 @@ These scripts should be executed from root of the project folder. Your url or we
 
 **Note:** The free tier of Heroku will put your app to sleep after 30 minutes. On cold start, you app will have very high latency which may result in a CRC failure that deactivates your webhook. To trigger a challenge response request and re-validate, run the following script.
 
-<<<<<<< HEAD
-node example_scripts/webhook_management/validate-webhook-config.js
--i <webhook_id>
+node example_scripts/webhook_management/validate-webhook-config.js -i <webhook_id>
 
 ## Production considerations
 
