@@ -3,39 +3,34 @@ const auth = require('../helpers/auth.js')
 const webhook_view = require('./webhook.js')
 
 
-module.exports = function (req, response) {
-  var saved_bearer_token
-  var json_response
+module.exports = async (req, resp) => {
 
-  // get list of subs
-  auth.get_twitter_bearer_token()
-    .then(function(bearer_token) {
-      saved_bearer_token = bearer_token
-      return auth.get_webhook_id(bearer_token)
-    })
-    .then(webhook_id => {
-      var request_options = {
-        url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all/list.json',
-        auth: {
-          'bearer': saved_bearer_token
-        }
+  try {
+    let json_response
+    let user_id;
+
+    // get list of subs
+    let bearer_token = await auth.get_twitter_bearer_token()
+    let webhook_id = await auth.get_webhook_id(bearer_token)
+
+    let request_options = {
+      url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all/list.json',
+      auth: {
+        'bearer': bearer_token
       }
+    }
 
-      return request.get(request_options)
-    })
-  // hydrate user objects from IDs
-  .then(function (body) {
-    var json_body = json_response = JSON.parse(body)
+    let body = await request.get(request_options)
+    let json_body = json_response = JSON.parse(body)
 
     // if no subs, render as is and skip user hydration
     if (!json_body.subscriptions.length) {
-      response.render('subscriptions', json_body)
+      resp.render('subscriptions', json_body)
       return Promise.resolve()
     }
 
     // construct comma delimited list of user IDs for user hydration
-    var user_id
-    json_body.subscriptions.forEach(function(sub) {
+    json_body.subscriptions.forEach(sub => {
       if (user_id) {
         user_id = user_id + ',' + sub.user_id
       } else {
@@ -43,40 +38,34 @@ module.exports = function (req, response) {
       }
     });
 
-    var request_options = {
+    request_options = {
       url: 'https://api.twitter.com/1.1/users/lookup.json?user_id=' + user_id,
       auth: {
-        'bearer': saved_bearer_token
+        'bearer': bearer_token
       }
     }
 
-    return request.get(request_options)
-  })
+    body = await request.get(request_options)
 
-  // replace the subscriptions list with list of user objects
-  // and render list
-  .then(function (body) {
+    // replace the subscriptions list with list of user objects
+    // and render list
     // only render if we didn't skip user hydration
     if (body) {
       json_response.subscriptions = JSON.parse(body)
       response.render('subscriptions', json_response)
     }
-  })
-
-  .catch(function (body) {
-    console.log(body)
-
+  } catch(e) {
     var json_response = {
       title: 'Error',
-      message: 'Subscriptions could not be retrieved.',
+      message: 'Subscriptions could not be retrieved. ',
       button: {
         title: 'Ok',
         url: '/'
       }
     }
 
+    json_response.message += JSON.parse(e.error).errors[0].message
     resp.status(500);
     resp.render('status', json_response)
-  })
-
+  }
 }

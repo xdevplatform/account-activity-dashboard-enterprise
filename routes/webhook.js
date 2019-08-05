@@ -2,70 +2,58 @@ const request = require('request-promise')
 const auth = require('../helpers/auth.js')
 const moment = require('moment')
 
-
-var webhook = {}
-
+let webhook = {}
 
 /**
  * Retrieves existing webhook config and renders
  */
-webhook.get_config = function (req, resp) {
-  // construct request to retrieve webhook config
-  var request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
-    oauth: auth.twitter_oauth
-  }
+webhook.get_config = async (req, resp) => {
+  try {
+    let request_options = {
+      url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+      oauth: auth.twitter_oauth
+    }
 
-  request.get(request_options)
+    const body = await request.get(request_options)
 
-  // success
-  .then(function (body) {
-    var json_response = {
-      configs: JSON.parse(body),
-      csrf_token: req.csrfToken(),
-      update_webhook_url: 'https://' + req.headers.host + '/webhook/twitter'
+    if (req.headers.host) {
+      var json_response = {
+        configs: JSON.parse(body),
+        csrf_token: req.csrfToken(),
+        update_webhook_url: 'https://' + req.headers.host + '/webhook/twitter'
+      }
     }
 
     if (json_response.configs.length) {
       json_response.update_webhook_url = json_response.configs[0].url
     }
 
-    console.log(json_response)
     resp.render('webhook', json_response)
-  })
-
-  // failure
-  .catch(function (body) {
-    if (body) {
-      console.log(body)
-    }
-    var json_response = {
+  } catch(e) {
+    let json_response = {
       title: 'Error',
-      message: 'Webhook config unable to be retrieved',
+      message: 'Error retrieving webhook config. ',
       button: {
         title: 'Ok',
         url: '/webhook'
       }
     }
 
+    json_response.message += JSON.parse(e.error).errors[0].message
     resp.status(500);
     resp.render('status', json_response)
-  })
+  }
 }
 
 
 /**
  * Triggers challenge response check
  */
-webhook.validate_config = function (req, resp) {
-  // get bearer token
-  auth.get_twitter_bearer_token()
+webhook.validate_config = async (req, resp) => {
+  try {
+    const bearer_token = await auth.get_twitter_bearer_token()
 
-  // validate webhook config
-  .then(function (bearer_token) {
-
-    // request options
-    var request_options = {
+    let request_options = {
       url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + req.body.webhook_id + '.json',
       resolveWithFullResponse: true,
       auth: {
@@ -73,50 +61,41 @@ webhook.validate_config = function (req, resp) {
       }
     }
 
-    // PUT request to retreive webhook config
-    request.put(request_options)
+    const response = request.put(request_options)
 
-    // success
-    .then(function (response) {
-      var json_response = {
-        title: 'Success',
-        message: 'Challenge request successful and webhook status set to valid.',
-        button: {
-          title: 'Ok',
-          url: '/webhook'
-        }
+    const json_response = {
+      title: 'Success',
+      message: 'Challenge request successful and webhook status set to valid.',
+      button: {
+        title: 'Ok',
+        url: '/webhook'
       }
+    }
 
-      resp.render('status', json_response)
-    })
-
-    // failure
-    .catch(function (response) {
-      var json_response = {
-        title: 'Error',
-        message: response.error,
-        button: {
-          title: 'Ok',
-          url: '/webhook'
-        }
+    resp.render('status', json_response)
+  } catch {
+    const json_response = {
+      title: 'Error',
+      message: response.error,
+      button: {
+        title: 'Ok',
+        url: '/webhook'
       }
+    }
 
-      resp.render('status', json_response)
-    })
-  })
+    resp.render('status', json_response)
+  }
 }
 
 /**
  * Deletes exiting webhook config
  * then creates new webhook config
  */
-webhook.update_config = function (req, resp) {
-  // delete webhook config
-  delete_webhook(req.body.webhook_id)
+webhook.update_config = async (req, resp) => {
+  try {
+    const response = await delete_webhook(req.body.webhook_id)
 
-  // create new webhook config
-  .then(function () {
-    var request_options = {
+    let request_options = {
       url: 'https://api.twitter.com/1.1/account_activity/all/' + auth.twitter_webhook_environment + '/webhooks.json',
       oauth: auth.twitter_oauth,
       headers: {
@@ -127,12 +106,9 @@ webhook.update_config = function (req, resp) {
       }
     }
 
-    return request.post(request_options)
-  })
+    const body = await request.post(request_options)
 
-  // render success response
-  .then(function (body) {
-    var json_response = {
+    const json_response = {
       title: 'Success',
       message: 'Webhook successfully updated.',
       button: {
@@ -142,11 +118,8 @@ webhook.update_config = function (req, resp) {
     }
 
     resp.render('status', json_response)
-  })
-
-  // render error response
-  .catch(function (body) {
-    var json_response = {
+  } catch(e) {
+    let json_response = {
       title: 'Error',
       message: 'Webhook not updated.',
       button: {
@@ -154,28 +127,25 @@ webhook.update_config = function (req, resp) {
         url: '/webhook'
       }
     }
-    console.log(body)
-    // Look for detailed error
-    if (body.error) {
-      json_response.message = JSON.parse(body.error).errors[0].message
+
+    if (e) {
+      console.log('e =>', e)
+      json_response.message = JSON.parse(e).errors[0].message
     }
 
     resp.render('status', json_response)
-  })
+  }
 }
 
 
 /**
  * Deletes existing webhook config
  */
-webhook.delete_config = function (req, resp) {
+webhook.delete_config = async (req, resp) => {
+  try {
+    const response = await delete_webhook(req.body.webhook_id)
 
-  // delete webhook config
-  delete_webhook(req.body.webhook_id)
-
-  // render success response
-  .then(function (body) {
-    var json_response = {
+    let json_response = {
       title: 'Success',
       message: 'Webhook successfully deleted.',
       button: {
@@ -185,83 +155,65 @@ webhook.delete_config = function (req, resp) {
     }
 
     resp.render('status', json_response)
-  })
+  } catch(e) {
 
-  // render error response
-  .catch(function () {
-    var json_response = {
+    let json_response = {
       title: 'Error',
-      message: 'Webhook was not deleted.',
+      message: 'Webhook was not deleted. ',
       button: {
         title: 'Ok',
         url: '/webhook'
       }
     }
-    console.log(body)
-    // Look for detailed error
-    if (body.error) {
-      json_response.message = JSON.parse(body.error).errors[0].message
-    }
 
+    json_response.message += JSON.parse(e.error).errors[0].message
     resp.render('status', json_response)
-  })
+  }
 }
 
 
 /**
  * Triggers a Replay job
  */
- webhook.replay_config = function (req, resp) {
+ webhook.replay_config = async (req, resp) => {
+   try {
+     const from_date = moment(req.body.startdate.toString()).format('YYYYMMDDHHmm')
+     const to_date = moment(req.body.enddate.toString()).format('YYYYMMDDHHmm')
 
-   var saved_bearer_token;
-   const FROM_DATE = moment(req.body.startdate.toString()).format('YYYYMMDDHHmm')
-   const TO_DATE = moment(req.body.enddate.toString()).format('YYYYMMDDHHmm')
+     const bearer_token = await auth.get_twitter_bearer_token()
+     const webhook_id = await auth.get_webhook_id(bearer_token)
 
-   auth.get_twitter_bearer_token()
-   .then(function (bearer_token) {
-     saved_bearer_token = bearer_token
-     return auth.get_webhook_id(bearer_token)
-   })
-   .then(webhook_id => {
-     // request options
-     var request_options = {
-       url: 'https://api.twitter.com/1.1/account_activity/replay/webhooks/' + webhook_id + '/subscriptions/all.json?from_date=' + FROM_DATE + '&to_date=' + TO_DATE,
+     let request_options = {
+       url: 'https://api.twitter.com/1.1/account_activity/replay/webhooks/' + webhook_id + '/subscriptions/all.json?from_date=' + from_date + '&to_date=' + to_date,
        auth: {
-         'bearer': saved_bearer_token
+         'bearer': bearer_token
        }
      }
 
-     // POST request to initial replay job
-     request.post(request_options)
+     const response = request.post(request_options)
 
-     // success
-     .then(function (response) {
-       var json_response = {
-         title: 'Success',
-         message: 'Replay job successfully initiated.',
-         button: {
-           title: 'Ok',
-           url: '/webhook'
-         }
+     var json_response = {
+       title: 'Success',
+       message: 'Replay job successfully initiated.',
+       button: {
+         title: 'Ok',
+         url: '/webhook'
        }
+     }
 
-       resp.render('status', json_response)
-     })
-
-     // failure
-     .catch(function (response) {
-       var json_response = {
-         title: 'Error',
-         message: response.error,
-         button: {
-           title: 'Ok',
-           url: '/webhook'
-         }
+     resp.render('status', json_response)
+   } catch {
+     let json_response = {
+       title: 'Error',
+       message: response.error,
+       button: {
+         title: 'Ok',
+         url: '/webhook'
        }
+     }
 
-       resp.render('status', json_response)
-     })
-   })
+     resp.render('status', json_response)
+   }
  }
 
 
@@ -269,8 +221,8 @@ webhook.delete_config = function (req, resp) {
  * Helper function that deletes the webhook config.
  * Returns a promise.
  */
-function delete_webhook (webhook_id) {
-  return new Promise (function (resolve, reject) {
+const delete_webhook = webhook_id => {
+  return new Promise(async (resolve, reject) => {
     // if no webhook id provided, assume there is none to delete
     if (!webhook_id) {
       resolve()
@@ -278,17 +230,18 @@ function delete_webhook (webhook_id) {
     }
 
     // construct request to delete webhook config
-    var request_options = {
-      url: 'https://api.twitter.com/1.1/account_activity/all/' + auth.twitter_webhook_environment + '/webhooks/' + webhook_id + '.json',
+    const request_options = {
+      url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '.json',
       oauth: auth.twitter_oauth,
       resolveWithFullResponse: true
     }
 
-    request.delete(request_options).then(function () {
+    try {
+      await request.delete(request_options)
       resolve()
-    }).catch(function () {
-      reject()
-    })
+    } catch(e) {
+      reject(e)
+    }
   })
 }
 
