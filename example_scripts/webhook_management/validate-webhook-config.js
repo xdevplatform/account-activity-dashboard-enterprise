@@ -5,7 +5,7 @@ const args = require('../args.js')
 
 // request options
 var request_options = {
-  url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + args.webhookid + '.json',
+  url: 'https://api.x.com/1.1/account_activity/webhooks/' + args.webhookid + '.json',
   oauth: auth.twitter_oauth,
   resolveWithFullResponse: true
 }

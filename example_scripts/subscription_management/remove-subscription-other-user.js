@@ -7,7 +7,7 @@ const args = require('../args.js')
 
 // request options to start PIN-based Twitter sign-in process
 var request_token_request_options = {
-  url: 'https://api.twitter.com/oauth/request_token?oauth_callback=oob',
+  url: 'https://api.x.com/oauth/request_token?oauth_callback=oob',
   oauth: auth.twitter_oauth
 }
 
@@ -18,7 +18,7 @@ request.get(request_token_request_options).then(function (body) {
   request_token_response = queryString.parse(body)
   
   console.log('Open this URL in a browser and sign-in with the Twitter account you wish to remove subscription from:')
-  console.log('https://api.twitter.com/oauth/authorize?oauth_token=' + request_token_response['oauth_token'] + '&force_login=true')
+  console.log('https://api.x.com/oauth/authorize?oauth_token=' + request_token_response['oauth_token'] + '&force_login=true')
 
   return prompt('Enter the generated PIN:')
 })
@@ -28,7 +28,7 @@ request.get(request_token_request_options).then(function (body) {
   prompt.end()
 
   var access_token_request_options = {
-    url: 'https://api.twitter.com/oauth/access_token?oauth_verifier=' + prompt_reponse,
+    url: 'https://api.x.com/oauth/access_token?oauth_verifier=' + prompt_reponse,
     oauth: {
       consumer_key: auth.twitter_oauth['consumer_key'],
       consumer_secret: auth.twitter_oauth['consumer_secret'],
@@ -45,7 +45,7 @@ request.get(request_token_request_options).then(function (body) {
   var access_tokens = queryString.parse(body)
 
   var subscription_request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/all/' + args.environment + '/subscriptions.json',
+    url: 'https://api.x.com/1.1/account_activity/all/' + args.environment + '/subscriptions.json',
     oauth: {
       consumer_key: auth.twitter_oauth['consumer_key'],
       consumer_secret: auth.twitter_oauth['consumer_secret'],

@@ -4,7 +4,7 @@ var auth = require('../../helpers/auth.js')
 
 // request options
 request_options = {
-  url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
+  url: 'https://api.x.com/1.1/account/verify_credentials.json',
   oauth: auth.twitter_oauth
 }
 

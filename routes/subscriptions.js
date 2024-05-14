@@ -15,7 +15,7 @@ module.exports = function (req, response) {
     })
     .then(webhook_id => {
       var request_options = {
-        url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all/list.json',
+        url: 'https://api.x.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all/list.json',
         auth: {
           'bearer': saved_bearer_token
         }
@@ -44,7 +44,7 @@ module.exports = function (req, response) {
     });
 
     var request_options = {
-      url: 'https://api.twitter.com/1.1/users/lookup.json?user_id=' + user_id,
+      url: 'https://api.x.com/1.1/users/lookup.json?user_id=' + user_id,
       auth: {
         'bearer': saved_bearer_token
       }

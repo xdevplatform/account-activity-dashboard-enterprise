@@ -12,7 +12,7 @@ var webhook = {}
 webhook.get_config = function (req, resp) {
   // construct request to retrieve webhook config
   var request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+    url: 'https://api.x.com/1.1/account_activity/webhooks.json',
     oauth: auth.twitter_oauth
   }
 
@@ -66,7 +66,7 @@ webhook.validate_config = function (req, resp) {
 
     // request options
     var request_options = {
-      url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + req.body.webhook_id + '.json',
+      url: 'https://api.x.com/1.1/account_activity/webhooks.json',
       resolveWithFullResponse: true,
       auth: {
         'bearer': bearer_token
@@ -117,7 +117,7 @@ webhook.update_config = function (req, resp) {
   // create new webhook config
   .then(function () {
     var request_options = {
-      url: 'https://api.twitter.com/1.1/account_activity/all/' + auth.twitter_webhook_environment + '/webhooks.json',
+      url: 'https://api.x.com/1.1/account_activity/webhooks.json',
       oauth: auth.twitter_oauth,
       headers: {
         'Content-type': 'application/x-www-form-urlencoded'
@@ -225,7 +225,7 @@ webhook.delete_config = function (req, resp) {
    .then(webhook_id => {
      // request options
      var request_options = {
-       url: 'https://api.twitter.com/1.1/account_activity/replay/webhooks/' + webhook_id + '/subscriptions/all.json?from_date=' + FROM_DATE + '&to_date=' + TO_DATE,
+       url: 'https://api.x.com/1.1/account_activity/replay/webhooks/' + webhook_id + '/subscriptions/all.json?from_date=' + FROM_DATE + '&to_date=' + TO_DATE,
        auth: {
          'bearer': saved_bearer_token
        }
@@ -279,7 +279,7 @@ function delete_webhook (webhook_id) {
 
     // construct request to delete webhook config
     var request_options = {
-      url: 'https://api.twitter.com/1.1/account_activity/all/' + auth.twitter_webhook_environment + '/webhooks/' + webhook_id + '.json',
+      url: 'https://api.x.com/1.1/account_activity/all/' + auth.twitter_webhook_environment + '/webhooks/' + webhook_id + '.json',
       oauth: auth.twitter_oauth,
       resolveWithFullResponse: true
     }

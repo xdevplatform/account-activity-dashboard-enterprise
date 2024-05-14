@@ -55,7 +55,7 @@ passport.use(new TwitterStrategy({
     consumerKey: auth.twitter_oauth.consumer_key,
     consumerSecret: auth.twitter_oauth.consumer_secret,
     // we want force login, so we set the URL with the force_login=true
-    userAuthorizationURL: 'https://api.twitter.com/oauth/authenticate?force_login=true'
+    userAuthorizationURL: 'https://api.x.com/oauth/authenticate?force_login=true'
   },
   // stores profile and tokens in the sesion user object
   // this may not be the best solution for your application
@@ -85,7 +85,7 @@ auth.get_twitter_auth_url = function (host, callback_action) {
 
   // construct request to retrieve authorization token
   var request_options = {
-    url: 'https://api.twitter.com/oauth/request_token',
+    url: 'https://api.x.com/oauth/request_token',
     method: 'POST',
     oauth: {
       callback: 'https://' + host + '/callbacks/twitter/' + callback_action,
@@ -103,7 +103,7 @@ auth.get_twitter_auth_url = function (host, callback_action) {
         // construct sign-in URL from returned authorization token
         var response_params = queryString.parse(response.body)
         console.log(response_params)
-        var twitter_auth_url = 'https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=' + response_params.oauth_token
+        var twitter_auth_url = 'https://api.x.com/oauth/authenticate?force_login=true&oauth_token=' + response_params.oauth_token
 
         resolve({
           response_params: response_params,
@@ -129,7 +129,7 @@ auth.get_twitter_bearer_token = function () {
 
   // construct request for bearer token
   var request_options = {
-    url: 'https://api.twitter.com/oauth2/token',
+    url: 'https://api.x.com/oauth2/token',
     method: 'POST',
     auth: {
       user: auth.twitter_oauth.consumer_key,
@@ -156,7 +156,7 @@ auth.get_twitter_bearer_token = function () {
 
 auth.get_webhook_id = function (bearer_token) {
   var request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+    url: 'https://api.x.com/1.1/account_activity/webhooks.json',
     method: 'GET',
     auth: { 'bearer' : bearer_token }
   }

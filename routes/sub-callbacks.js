@@ -9,12 +9,15 @@ var sub_request_options = {
 
 var actions = {}
 
-actions.addsub = function (user) {
-  auth.get_webhook_id()
+actions.addsub = async function (user) {
+  console.log(user);
+  const t = await auth.get_twitter_bearer_token();
+  console.log("hey Tapan", t);
+  auth.get_webhook_id(t)
     .then(webhook_id => {
       sub_request_options.oauth.token = user.access_token
       sub_request_options.oauth.token_secret = user.access_token_secret
-      sub.sub_request_options.url = 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
+      sub_request_options.url = 'https://api.x.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
 
       request.post(sub_request_options)
     })
@@ -25,7 +28,7 @@ actions.removesub = function (user) {
     .then(webhook_id => {
       sub_request_options.oauth.token = user.access_token
       sub_request_options.oauth.token_secret = user.access_token_secret
-      sub.sub_request_options.url = 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
+      sub.sub_request_options.url = 'https://api.x.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
 
       request.delete(sub_request_options)
     })
