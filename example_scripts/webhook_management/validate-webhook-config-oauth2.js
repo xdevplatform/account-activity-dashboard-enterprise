@@ -3,15 +3,13 @@ const auth = require('../../helpers/auth.js')
 const args = require('../args.js')
 
 
-auth.get_twitter_bearer_token().then(function (bearer_token) {
+// auth.get_twitter_bearer_token().then(function (bearer_token) { // This line and its structure are removed
 
   // request options
   var request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + args.webhookid + '.json',
+    url: 'https://api.twitter.com/2/webhooks/' + args.webhookid,
     resolveWithFullResponse: true,
-    auth: {
-      'bearer': bearer_token
-    }
+    headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token }
   }
 
   // PUT request to retrieve webhook config
@@ -21,5 +19,5 @@ auth.get_twitter_bearer_token().then(function (bearer_token) {
   }).catch(function (response) {
     console.log('HTTP response code:', response.statusCode)
     console.log(response.error)
-  })
-})
+  });
+// }); // Corresponding end of removed structure

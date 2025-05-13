@@ -5,8 +5,8 @@ const args = require('../args.js')
 
 // request options
 var request_options = {
-  url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + args.webhookid + '.json',
-  oauth: auth.twitter_oauth
+  url: 'https://api.twitter.com/2/webhooks/' + args.webhookid,
+  headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token }
 }
 
 
@@ -19,8 +19,8 @@ request.get(request_options).then( function (body) {
 
   // update request options for delete endpoint
   request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '.json',
-    oauth: auth.twitter_oauth,
+    url: 'https://api.twitter.com/2/webhooks/' + webhook_id,
+    headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token },
     resolveWithFullResponse: true
   }
 

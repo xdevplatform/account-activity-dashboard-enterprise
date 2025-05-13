@@ -13,10 +13,11 @@ const RequiredEnv = [
   'TWITTER_CONSUMER_SECRET',
   'TWITTER_ACCESS_TOKEN',
   'TWITTER_ACCESS_TOKEN_SECRET',
+  'TWITTER_BEARER_TOKEN',
 ]
 
 if (!RequiredEnv.every(key => typeof process.env[key] !== 'undefined')) {
-  console.error(`One of more of the required environment variables (${RequiredEnv.join(', ')}) are not defined. Please check your environment and try again.`)
+  console.error(`One or more of the required environment variables (${RequiredEnv.join(', ')}) are not defined. Please check your environment and try again.`)
   process.exit(-1)
 }
 
@@ -29,6 +30,7 @@ auth.twitter_oauth = {
   token: process.env.TWITTER_ACCESS_TOKEN,
   token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 }
+auth.provided_bearer_token = process.env.TWITTER_BEARER_TOKEN;
 
 // basic auth middleware for express
 if (typeof process.env.BASIC_AUTH_USER !== 'undefined' &&
@@ -154,11 +156,11 @@ auth.get_twitter_bearer_token = function () {
   })
 }
 
-auth.get_webhook_id = function (bearer_token) {
+auth.get_webhook_id = function () {
   var request_options = {
-    url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
+    url: 'https://api.twitter.com/2/webhooks',
     method: 'GET',
-    auth: { 'bearer' : bearer_token }
+    headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token }
   }
 
   return new Promise (function (resolve, reject) {

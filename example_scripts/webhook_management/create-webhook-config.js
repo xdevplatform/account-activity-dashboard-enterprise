@@ -5,14 +5,14 @@ const args = require('../args.js')
 
 // request options
 var request_options = {
-  url: 'https://api.twitter.com/1.1/account_activity/webhooks.json',
-  oauth: auth.twitter_oauth,
+  url: 'https://api.twitter.com/2/webhooks',
   headers: {
-    'Content-type': 'application/x-www-form-urlencoded'
+    'Authorization': 'Bearer ' + auth.provided_bearer_token
   },
-  form: {
+  body: {
     url: args.url
-  }
+  },
+  json: true
 }
 
 

@@ -3,7 +3,7 @@ const passport = require('passport')
 const auth = require('../helpers/auth.js')
 
 var sub_request_options = {
-  oauth: auth.twitter_oauth,
+  headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token },
   resolveWithFullResponse: true
 }
 
@@ -12,9 +12,7 @@ var actions = {}
 actions.addsub = function (user) {
   auth.get_webhook_id()
     .then(webhook_id => {
-      sub_request_options.oauth.token = user.access_token
-      sub_request_options.oauth.token_secret = user.access_token_secret
-      sub.sub_request_options.url = 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
+      sub_request_options.url = 'https://api.twitter.com/2/webhooks/' + webhook_id + '/subscriptions/all',
 
       request.post(sub_request_options)
     })
@@ -23,9 +21,7 @@ actions.addsub = function (user) {
 actions.removesub = function (user) {
   auth.get_webhook_id()
     .then(webhook_id => {
-      sub_request_options.oauth.token = user.access_token
-      sub_request_options.oauth.token_secret = user.access_token_secret
-      sub.sub_request_options.url = 'https://api.twitter.com/1.1/account_activity/webhooks/' + webhook_id + '/subscriptions/all.json',
+      sub_request_options.url = 'https://api.twitter.com/2/webhooks/' + webhook_id + '/subscriptions/all',
 
       request.delete(sub_request_options)
     })

@@ -6,8 +6,8 @@ const args = require('../args.js')
 
 
 var request_options = {
-  url: 'https://api.twitter.com/1.1/account_activity/webhooks/' + args.webhookid + '/subscriptions/all.json',
-  oauth: auth.twitter_oauth,
+  url: 'https://api.twitter.com/2/webhooks/' + args.webhookid + '/subscriptions/all',
+  headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token },
   resolveWithFullResponse: true
 }
 
