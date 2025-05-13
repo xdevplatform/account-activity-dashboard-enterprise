@@ -4,10 +4,11 @@ html {
 
 body {
   margin: 0 0 0 0;
-  background: linear-gradient(#FFF, #DDD);
+  background: linear-gradient(#333, #111);
   background-attachment: fixed;
   height: 100%;
   overflow-y: scroll;
+  color: #f0f0f0;
 }
 
 nav, .card {
@@ -15,21 +16,40 @@ nav, .card {
 }
 
 .jumbotron {
-  background-color: #EFEFEF;
+  background-color: #2a2a2a;
+  color: #f0f0f0;
 }
 
 nav, .jumbotron, .card {
-  box-shadow: 0px 8px 10px #CCC;
+  box-shadow: 0px 8px 10px #000;
+}
+
+.card {
+  background-color: #222;
+  color: #f0f0f0;
+}
+
+.card-header {
+  background-color: #333;
+  border-bottom: 1px solid #444;
+}
+
+.card-footer {
+  background-color: #333;
+  border-top: 1px solid #444;
 }
 
 .json-event textarea {
   height: 200px;
   font-family: "Courier New", Courier, monospace;
-  background-color: #f8f9fa;
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+  border: 1px solid #444;
 }
 
 .json-event textarea:disabled {
-  background-color: #f8f9fa;
+  background-color: #1a1a1a;
+  color: #ccc;
 }
 
 .fa-window-minimize {
@@ -38,12 +58,84 @@ nav, .jumbotron, .card {
 
 .icon-btn {
   cursor: pointer;
+  color: #bbb;
 }
 
 .icon-btn:hover {
-  color: #333;
+  color: #fff;
 }
 
 #home-menu li {
   list-style: none;
+}
+
+.bg-primary {
+  background-color: #111 !important;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-danger {
+}
+.btn-warning {
+}
+.btn-secondary {
+  background-color: #444;
+  border-color: #555;
+}
+.btn-secondary:hover {
+  background-color: #666;
+  border-color: #777;
+}
+
+a, .nav-link {
+  color: #6cb2eb;
+}
+a:hover, .nav-link:hover {
+  color: #9bcbf5;
+}
+
+.form-control {
+  background-color: #333;
+  color: #f0f0f0;
+  border: 1px solid #555;
+}
+.form-control:focus {
+  background-color: #444;
+  color: #f0f0f0;
+  border-color: #777;
+  box-shadow: none;
+}
+.form-control[disabled], .form-control[readonly] {
+  background-color: #2a2a2a;
+  opacity: 0.7;
+}
+
+.modal-content {
+  background-color: #222;
+  color: #f0f0f0;
+}
+.modal-header {
+  border-bottom: 1px solid #444;
+}
+.modal-header.bg-danger {
+  background-color: #d9534f !important;
+  color: white;
+}
+.modal-footer {
+  border-top: 1px solid #444;
+}
+
+.alert-primary {
+  color: #c2e0ff;
+  background-color: #1c3c59;
+  border-color: #18324a;
 }

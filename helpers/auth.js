@@ -160,17 +160,24 @@ auth.get_webhook_id = function () {
   var request_options = {
     url: 'https://api.twitter.com/2/webhooks',
     method: 'GET',
-    headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token }
+    headers: { 'Authorization': 'Bearer ' + auth.provided_bearer_token },
+    json: true
   }
 
   return new Promise (function (resolve, reject) {
-    request(request_options, function(error, response) {
+    request(request_options, function(error, response, body) {
       if (error) {
-        reject(error)
+        reject(error);
+      } else if (response.statusCode !== 200) {
+        reject(new Error(`Failed to get webhooks, status code: ${response.statusCode} Body: ${JSON.stringify(body)}`));
       } else {
-        const json_response = JSON.parse(response.body)
-        auth.webhook_id = json_response[0].id
-        resolve(auth.webhook_id)
+        if (body && body.data && Array.isArray(body.data) && body.data.length > 0) {
+          auth.webhook_id = body.data[0].id;
+          resolve(auth.webhook_id);
+        } else {
+          console.warn('No webhooks found or unexpected response structure from /2/webhooks:', body);
+          reject(new Error('No webhook ID found. Please ensure a webhook is registered.'));
+        }
       }
     })
   })
