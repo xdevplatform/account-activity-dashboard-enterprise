@@ -285,58 +285,23 @@ async function populateWebhookDropdownForSubscriptions() {
     }
 }
 
-async function fetchAndDisplaySubscriptions(webhookId) {
-    const container = document.getElementById('subscriptions-list-container');
-    if (!container) return;
-
-    container.innerHTML = '<p>Loading subscriptions...</p>';
-
-    try {
-        const response = await fetch(`/api/webhooks/${webhookId}/subscriptions`);
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Failed to parse error from server' }));
-            throw new Error(`Error ${response.status}: ${errorData.error || errorData.details?.title || errorData.details?.detail || errorData.message || 'Failed to fetch subscriptions'}`);
-        }
-        const result = await response.json();
-
-        if (result.data && result.data.length > 0) {
-            const ul = document.createElement('ul');
-            ul.id = 'subscriptions-list';
-            result.data.forEach(subscription => {
-                const li = document.createElement('li');
-                // Assuming the API returns user objects with id, name, username
-                // The Twitter API for /2/webhooks/:webhook_id/subscriptions returns a list of user objects that are subscribed.
-                li.innerHTML = `
-                    <p><strong>User ID:</strong> <span class="code-block-value">${subscription.id}</span></p>
-                    <p><strong>Name:</strong> <span class="code-block-value">${subscription.name || 'N/A'}</span></p>
-                    <p><strong>Username:</strong> <span class="code-block-value">${subscription.username || 'N/A'}</span></p>
-                `;
-                ul.appendChild(li);
-            });
-            container.innerHTML = ''; // Clear loading message
-            container.appendChild(ul);
-        } else if (result.meta && result.meta.result_count === 0) {
-            container.innerHTML = '<p>No active subscriptions for this webhook.</p>';
-        } else {
-            container.innerHTML = '<p>No subscriptions found or unable to parse data.</p>';
-        }
-    } catch (err) {
-        console.error("Failed to fetch or display subscriptions:", err);
-        container.innerHTML = `<p style="color: red;">Error loading subscriptions: ${err.message}</p>`;
-    }
-}
-
 function handleSubscriptionWebhookChange(event) {
     const selectElement = document.getElementById('webhook-select-for-subscriptions');
     const subscriptionsListContainer = document.getElementById('subscriptions-list-container');
     if (!selectElement || !subscriptionsListContainer) return;
 
-    const selectedWebhookId = selectElement.value; // event.target.value can also be used
-    subscriptionsListContainer.innerHTML = ''; // Clear previous subscriptions or messages
+    const selectedWebhookId = selectElement.value; 
+    subscriptionsListContainer.innerHTML = ''; 
 
     if (selectedWebhookId) {
         console.log(`Webhook selected for subscriptions: ${selectedWebhookId}`);
-        fetchAndDisplaySubscriptions(selectedWebhookId);
+        // This will call the global fetchAndDisplaySubscriptions from subscriptionHandler.js
+        if (typeof fetchAndDisplaySubscriptions === 'function') {
+            fetchAndDisplaySubscriptions(selectedWebhookId);
+        } else {
+            console.error("fetchAndDisplaySubscriptions is not defined. Ensure subscriptionHandler.js is loaded.");
+            if(subscriptionsListContainer) subscriptionsListContainer.innerHTML = '<p style="color:red">Error: UI Component not loaded.</p>';
+        }
     } else {
         subscriptionsListContainer.innerHTML = '<p>Please select a webhook to see subscriptions.</p>';
     }
@@ -347,56 +312,6 @@ function initializeSubscriptionsPage() {
     const selectElement = document.getElementById('webhook-select-for-subscriptions');
     if (selectElement) {
         selectElement.addEventListener('change', handleSubscriptionWebhookChange);
-    }
-}
-
-async function handleAddSubscription() {
-    const webhookSelectElement = document.getElementById('webhook-select-for-subscriptions');
-    const messageElement = document.getElementById('add-subscription-message');
-
-    if (!webhookSelectElement || !messageElement) {
-        console.error("Required elements for adding subscription not found.");
-        if (messageElement) {
-            messageElement.textContent = 'Error: UI elements missing. Please refresh.';
-            messageElement.style.color = 'red';
-        }
-        return;
-    }
-
-    const selectedWebhookId = webhookSelectElement.value;
-
-    messageElement.textContent = ''; // Clear previous messages
-
-    if (!selectedWebhookId) {
-        messageElement.textContent = 'Please select a webhook first.';
-        messageElement.style.color = 'red';
-        return;
-    }
-
-    messageElement.textContent = `Attempting to subscribe user (from .env settings) to webhook ${selectedWebhookId}...`;
-    messageElement.style.color = 'black';
-
-    try {
-        const response = await fetch(`/api/webhooks/${selectedWebhookId}/subscriptions`, {
-            method: 'POST',
-            headers: {},
-        });
-
-        const responseData = await response.json().catch(() => ({ message: 'Failed to parse server response.' }));
-
-        if (response.ok) {
-            messageElement.textContent = responseData.message || 'Subscription request successful!';
-            messageElement.style.color = 'green';
-            fetchAndDisplaySubscriptions(selectedWebhookId); // Refresh list
-        } else {
-            const errorDetail = responseData.details?.title || responseData.details?.detail || responseData.error || responseData.message || 'Unknown error';
-            messageElement.textContent = `Error ${response.status}: ${errorDetail}`;
-            messageElement.style.color = 'red';
-        }
-    } catch (err) {
-        console.error("Failed to add subscription:", err);
-        messageElement.textContent = `Failed to add subscription: ${err.message}`;
-        messageElement.style.color = 'red';
     }
 }
 

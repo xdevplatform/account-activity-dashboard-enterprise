@@ -171,3 +171,141 @@ body { font-family: sans-serif; margin: 0; }
 .code-block-value a:hover {
     text-decoration: underline;
 } 
+
+/* Styling for Subscriptions List - similar to Webhooks List */
+#subscriptions-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 900px; /* Increased from 800px */
+}
+
+#subscriptions-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px; /* Decreased from 15px */
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left; 
+    overflow: hidden; /* In case buttons are floated later */
+    min-width: 450px; /* Increased from 350px */
+    /* max-width can still be controlled by the parent ul if needed */
+}
+
+#subscriptions-list li p {
+    margin: 5px 0;
+}
+
+#subscriptions-list li strong {
+    display: inline-block;
+    width: auto; /* Or e.g., width: 70px; */
+    margin-right: 10px; /* Add some spacing between label and value */
+}
+
+/* Styling for the Delete Subscription button */
+.delete-subscription-btn {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 6px 10px; /* Slightly smaller than webhook buttons */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.85em; /* Slightly smaller font */
+    border-radius: 4px;
+    cursor: pointer;
+    float: right; 
+    margin-left: 10px;
+    /* margin-top: -2px; /* Optional: align better with the text line if needed */
+}
+
+.delete-subscription-btn:hover {
+    background-color: #da190b; /* Darker red */
+}
+
+.avatar-img {
+    width: 48px; /* _bigger is 73x73, but 48px is common for avatars in lists */
+    height: 48px;
+    border-radius: 50%; /* Circular avatar */
+    border: 1px solid #ddd;
+    vertical-align: middle; /* Align with text if next to it */
+    margin-top: 5px;
+} 
+
+/* New styles for user card layout */
+.user-card-layout {
+    display: flex;
+    align-items: center; /* Vertically center items */
+    margin-top: 5px; /* Decreased from 10px */
+}
+
+.user-avatar-container {
+    flex-shrink: 0; /* Prevent avatar container from shrinking */
+    margin-right: 15px; /* Space between avatar and text info */
+}
+
+.user-avatar-container .avatar-img {
+    /* Ensure avatar styles from before are still applied if needed, or adjust */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    display: block; /* Prevents extra space below image */
+}
+
+.avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: #777;
+}
+/* Optional: Add placeholder text if image fails to load, e.g. initials */
+/* .avatar-placeholder::before { content: "N/A"; } */
+
+.user-info-container {
+    flex-grow: 1; /* Allow text info to take remaining space */
+    display: flex;
+    flex-direction: column; /* Stack p tags vertically */
+    justify-content: center; /* Vertically center the text lines relative to each other */
+}
+
+.user-info-container p {
+    margin: 1px 0; /* Decreased from 2px 0 */
+}
+
+.user-info-container .user-handle {
+    font-weight: bold;
+    font-size: 1.1em; /* Make handle slightly larger */
+    color: #333;
+    margin-bottom: 2px; /* Space between handle and subtext */
+}
+
+.user-info-container .user-id-subtext {
+    font-size: 0.85em; /* Smaller font for subtext */
+    color: #666; /* Lighter color for subtext */
+    margin-top: 0;
+}
+
+/* Ensure the user-details-placeholder itself doesn't add unwanted padding/margins */
+.user-details-placeholder {
+    /* If it had any specific styling that conflicted, reset or adjust here */
+}
+
+/* Adjustments to subscription list item if needed */
+#subscriptions-list li .user-details-placeholder + div {
+    /* This was an old selector that might not be relevant */
+    /* clear: both; */ 
+}
+
+#subscriptions-list li strong {
+    /* display: inline-block; */ /* May not be needed if flex handles alignment */
+    /* width: auto; */
+    margin-right: 5px; /* Slightly reduce margin if an issue with wrapping */
+} 

@@ -1,5 +1,6 @@
 import { serve } from "bun";
 import { handleWebhookRoutes } from "./src/routes/webhookRoutes"; // Import the new handler
+import { handleUserRoutes } from "./src/routes/userRoutes"; // Import the new user route handler
 import path from "node:path"; // For path joining
 
 const projectRoot = import.meta.dir;
@@ -10,10 +11,16 @@ serve({
     const url = new URL(req.url);
     console.log(`[REQUEST] ${req.method} ${url.pathname}`);
 
-    // Handle /api/webhooks routes
+    // Handle /api/webhooks routes (which now also delegates to subscriptionRoutes)
     const webhookResponse = await handleWebhookRoutes(req, url);
     if (webhookResponse) {
       return webhookResponse;
+    }
+
+    // Handle /api/users routes
+    const userResponse = await handleUserRoutes(req, url);
+    if (userResponse) {
+      return userResponse;
     }
 
     // Static file serving from /public
