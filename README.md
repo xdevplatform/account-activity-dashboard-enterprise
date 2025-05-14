@@ -1,149 +1,111 @@
-# account-activity-dashboard-enterprise
+# Account Activity Dashboard (Bun Version)
 
-Sample web app and helper scripts to get started with Twitter's enterprise Account Activity API (All Activities). Written in Node.js. Full documentation for this API can be found on the [Account Activity API reference](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview).
+A web application to help manage Twitter Account Activity API webhooks. This version is built using [Bun](https://bun.sh/).
 
-Enterprise Account Activity API differs from the Premium Account Activity API in the following ways
-* Request a redelivery of events, up to the past five days, through the Enterprise Account Activity Replay API
-* Up to 500+ unique subscriptions vs 250 for premium
-* Three or more webhooks vs one webhook for premium
+## Features (Current)
 
-## Dependencies
+*   **Webhook Management (via UI):**
+    *   List registered webhooks for your Twitter application.
+    *   Add new webhook URLs.
+    *   Delete existing webhooks.
+    *   Initiate a Challenge-Response Check (CRC) to validate a webhook.
+*   **Navigation:**
+    *   Tabbed interface for "Webhooks", "Subscriptions" (placeholder), and "Live Events" (placeholder).
+    *   Logo and title in the navigation bar.
+*   **Backend:**
+    *   Serves the frontend `index.html`.
+    *   Provides API endpoints (`/api/webhooks`) to interact with the Twitter API for webhook management, using a Bearer Token for authentication.
+    *   Logs requests and responses to the console.
 
-* A Twitter app created on [developer.twitter.com](https://developer.twitter.com/en/apps), enabled for access to the Account Activity API
-* [Node.js](https://nodejs.org)
-* [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) or other webhost (optional)
-* [ngrok](https://ngrok.com/) or other tunneling service (optional)
+## Technologies Used
 
-## Create and configure a Twitter app
+*   **Runtime & Bundler:** [Bun](https://bun.sh/)
+*   **Frontend:** HTML, CSS, vanilla JavaScript
+*   **API Interaction:** `fetch` API (both frontend and backend)
 
-1. Create a Twitter app on [Twitter Developer](https://developer.twitter.com/en/apps)
+## Setup
 
-2. On the **Permissions** tab ➡️ **Edit** ➡️ **Access permission** section ➡️ enable **Read, Write and direct messages**.
-
-3. On the **Keys and Tokens** tab ➡️ **Access token & access token secret** section ➡️ click **Create** button.
-
-4. On the **Keys and Tokens** tab, take note of the **consumer API key**, **consumer API secret**, **access token** and **access token secret**.
-
-## Setup & run the Node.js web app
-
-1. Clone this repository:
-
+1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/twitterdev/account-activity-dashboard.git
+    git clone <your-repository-url>
+    cd <repository-directory>
     ```
 
-2. Install Node.js dependencies:
+2.  **Install Dependencies (Bun will handle this when running):**
+    Bun typically installs dependencies automatically when it encounters them in `import` statements or as specified in `package.json` if you start using it more formally. For now, ensuring Bun is installed is key.
 
+3.  **Configure Environment Variables:**
+    *   Copy the `env.template` file to a new file named `.env` in the root of the project:
+        ```bash
+        cp env.template .env
+        ```
+    *   Edit the `.env` file and add your Twitter App's Bearer Token:
+        ```
+        X_CONSUMER_KEY=
+        X_CONSUMER_SECRET=
+        X_ACCESS_TOKEN=
+        X_ACCESS_TOKEN_SECRET=
+        X_BEARER_TOKEN=YOUR_TWITTER_APP_BEARER_TOKEN_HERE # Replace this
+        ```
+        The Bearer Token is used for authenticating with the Twitter API v2 webhook endpoints.
+
+## Running the Application
+
+1.  **Start the Server:**
     ```bash
-    npm install
+    bun run index.ts
     ```
+    This will start the Bun server, typically on port 3000. The console will confirm the listening address (e.g., `Listening on http://localhost:3000 ...`).
 
-3. Pass your Twitter keys, tokens and webhook environment name as environment variables. Twitter keys and access tokens are found on your app page on your [App Dashboard](https://developer.twitter.com/apps). The basic auth properties can be anything you want, and are used for simple password protection to access the configuration UI. As an alternative, instead of setting up env variables, you can copy the `env.template` file into a file named `.env` and and add these details there.
-
-   ```bash
-   TWITTER_CONSUMER_KEY= # your consumer key
-   TWITTER_CONSUMER_SECRET= # your consumer secret
-   TWITTER_ACCESS_TOKEN= # your access token
-   TWITTER_ACCESS_TOKEN_SECRET= # your access token secret
-   BASIC_AUTH_USER= # your basic auth user
-   BASIC_AUTH_PASSWORD= # your basic auth password
-   ```
-
-
-
-4. Run locally:
-
+    For development with automatic reloading when `index.ts` changes:
     ```bash
-    npm start
+    bun run --watch index.ts
     ```
+    *(Note: Hot reloading for `index.html` changes directly served by `Bun.file()` might require a browser refresh or further server configuration if not automatically handled by Bun's development server for static files.)*
 
-5. Deploy app or setup a tunnel to localhost. To deploy to Heroku see "Deploy to Heroku" instructions below. To setup a tunnel use something like [ngrok](https://ngrok.com/).
+2.  **Access in Browser:**
+    Open your web browser and navigate to `http://localhost:3000` (or the port indicated in the console).
 
-    Take note of your webhook URL. For example:
+## Project Structure
 
-    ```text
-    https://your.app.domain/webhook/twitter
-    ```
+```
+.
+├── .env                # Local environment variables (created from env.template)
+├── .env.template       # Template for environment variables
+├── .gitignore          # Specifies intentionally untracked files
+├── index.html          # Main frontend HTML, CSS, and JavaScript
+├── index.ts            # Bun server (backend logic, API proxy)
+├── package.json        # Project metadata, scripts, and dependencies
+├── bun.lockb           # Bun's lockfile
+├── tsconfig.json       # TypeScript configuration for editor support
+└── README.md           # This file
+```
 
-6. Take note of the deployed URL, revisit your developer.twitter.com Apps **Settings** page, and add the following URL values as whitelisted Callback URLs:
+## How it Works
 
-    ```text
-    http(s)://your.app.domain/callbacks/addsub
-    http(s)://your.app.domain/callbacks/removesub
-    ```
+*   The `index.ts` file uses Bun's built-in `serve` function to create an HTTP server.
+*   It serves the `index.html` file for the root path (`/`).
+*   It provides API endpoints under `/api/webhooks` that the frontend calls:
+    *   `GET /api/webhooks`: Fetches the list of registered webhooks.
+    *   `POST /api/webhooks`: Creates a new webhook.
+    *   `DELETE /api/webhooks/:id`: Deletes a specified webhook.
+    *   `PUT /api/webhooks/:id`: Initiates a CRC validation for a specified webhook.
+*   These backend endpoints securely use the `X_BEARER_TOKEN` from the `.env` file to make authenticated requests to the Twitter API (`https://api.twitter.com/2/webhooks`).
+*   The frontend `index.html` uses JavaScript to:
+    *   Manage tab navigation.
+    *   Fetch data from the backend API endpoints.
+    *   Dynamically render the list of webhooks.
+    *   Handle user interactions for adding, deleting, and validating webhooks, including confirmation dialogs and feedback messages.
 
-## Configure webhook to receive events
+## Future Enhancements (Potential)
 
-To configure your webhook you can use this apps' web UI, or use the example scripts from the command line.
+*   Implement "Subscriptions" and "Live Events" tabs.
+*   Add user authentication if multiple users need to manage webhooks.
+*   Improve UI/UX styling.
+*   More robust error handling and user feedback.
+*   Client-side and server-side validation for inputs.
+*   Webhook URL specific CRC handling/display within the UI.
 
-### Using the web UI
+## Security Note
 
-Load the web app in your browser and follow the instructions below.
-
-1. Setup webhook config. Navigate to the "manage webhook" view. Enter your webhook URL noted earlier and click "Create/Update."
-
-2. Add a user subscription. Navigate to the "manage subscriptions" view. Click "add" and proceed with Twitter sign-in. Once complete your webhook will start to receive account activity events for the user.
-
-### Using the command line example scripts
-
-These scripts should be executed from root of the project folder. Your url or webhook ID should be passed in as command line arguments.
-
-1. Create webhook config.
-
-    ```bash
-    node example_scripts/webhook_management/create-webhook-config.js -e <environment> -u <url>
-    ```
-
-2. Add a user subscription for the user that owns the app.
-
-    ```bash
-    node example_scripts/subscription_management/add-subscription-app-owner.js -e <environment>
-    ```
-
-3. To add a user subscription for another user using PIN-based Twitter sign-in.
-
-    ```bash
-    node example_scripts/subscription_management/add-subscription-other-user.js -e <environment>
-    ```
-
-**Note:** More example scripts can be found in the [example_scripts](example_scripts) directory to:
-
-* Create, delete, retrieve and validate webhook configs.
-* Add, remove, retrieve, count and list user subscriptions.
-
-## Deploy to Heroku (optional)
-
-1. Init Heroku app.
-
-    ```bash
-    heroku create
-    ```
-
-2. Run locally.
-
-    ```text
-    heroku local
-    ```
-
-3. Configure environment variables for each  See Heroku documentation on [Configuration and Config Vars](https://devcenter.heroku.com/articles/config-vars).
-
-4. Deploy to Heroku.
-
-    ```bash
-    git push heroku master
-    ```
-
-**Note:** The free tier of Heroku will put your app to sleep after 30 minutes. On cold start, you app will have very high latency which may result in a CRC failure that deactivates your webhook. To trigger a challenge response request and re-validate, run the following script.
-
-node example_scripts/webhook_management/validate-webhook-config.js -i <webhook_id>
-
-## Production considerations
-
-This app is for demonstration purposes only, and should not be used in production without further modifcations. Dependencies on databases, and other types of services are intentionally not within the scope of this sample app. Some considerations below:
-
-* With this basic application, user information is stored in server side sessions. This may not provide the best user experience or be the best solution for your use case, especially if you are adding more functionality.
-* The application can handle light usage, but you may experience API rate limit issues under heavier load. Consider storing data locally in a secure database, or caching requests.
-* To support multiple users (admins, team members, customers, etc), consider implementing a form of Access Control List for better security.
-
-# Security Issues?
-Please report sensitive security issues via Twitter's bug-bounty program (https://hackerone.com/twitter) rather than GitHub.
+This application is currently designed for local development and management by a trusted user who has access to the Bearer Token. Ensure your `.env` file with the Bearer Token is kept secure and not committed to version control if the repository becomes public.
