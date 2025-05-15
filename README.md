@@ -1,162 +1,118 @@
 # Account Activity Dashboard (AAA Dashboard)
 
-## Overview
-
-The Account Activity Dashboard (AAA Dashboard) is a single-page web application designed to manage X (formerly Twitter) account activity. It allows users to register and manage webhooks, subscribe users to these webhooks for activity events, and view a live stream of these events.
-
-The application features a frontend built with HTML, CSS, and vanilla JavaScript, and a backend powered by Bun.js using TypeScript.
+A Bun.js web application to monitor and manage X (formerly Twitter) Account Activity API webhooks, subscriptions, and live events.
 
 ## Features
 
-### 1. Webhooks Management
-Administrate the webhook URLs registered with your X Developer App.
-- **List Webhooks:** View all currently registered webhooks for your X application, including their ID, URL, creation date, and validity status.
-- **Add Webhook:** Register a new webhook URL with X. The dashboard requires the full URL that X will send events to.
-- **Delete Webhook:** Remove an existing webhook registration from X.
-- **Validate Webhook (CRC Check):** Manually trigger a CRC (Challenge-Response Check) request from X to your webhook URL to confirm its validity.
+*   **Webhooks Management:**
+    *   List registered webhooks.
+    *   Add new webhooks.
+    *   Delete existing webhooks.
+    *   Validate webhooks (CRC check).
+    *   Replay events for a webhook within a specified date/time range.
+*   **Subscriptions Management:**
+    *   List user subscriptions for a selected webhook.
+    *   Add new subscriptions (for the user specified in `.env`).
+    *   Delete user subscriptions.
+*   **Live Events Viewer:**
+    *   Real-time stream of events via WebSockets.
+    *   Supports various event types: Tweet create/delete, Favorite, Follow/Unfollow, Mute/Unmute, Replay job status, Direct Messages (received, sent, typing indicator, read receipts).
+    *   Instructions panel for setting up ngrok to receive events locally.
 
-### 2. Subscriptions Management (Per Webhook)
-Manage user subscriptions for each registered webhook. This determines whose account activity will generate events.
-- **Webhook Selection:** Choose an active webhook from a dropdown list to manage its specific subscriptions.
-- **List Subscriptions:** For the selected webhook, view a list of all users currently subscribed. Each user is displayed with their avatar, X handle (username), and User ID. Avatars link to the user's X profile.
-- **Add Subscription:** Subscribe the user (whose credentials are in the `.env` file, specifically `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` which represent the user to be subscribed) to the selected webhook to start receiving their account activity events.
-- **Delete Subscription:** Unsubscribe a specific user from the selected webhook, stopping event delivery for their activity.
+## Quick Start
 
-### 3. Live Events Viewer
-View a real-time stream of account activity events for subscribed users.
-- **Real-time Updates:** Uses WebSockets to receive and display events as they happen.
-- **Event Cards:** Each event is displayed as a card with relevant details. Supported event types include:
-    - **New Posts:** Shows when a subscribed user creates a new post (content, user info, timestamp).
-    - **Deleted Posts:** Shows when a post from a subscribed user is deleted (post ID, user ID, timestamp).
-    - **Favorited Posts:** Shows when a subscribed user favorites a post (favoriting user, details of the favorited post).
-    - **Follows/Unfollows:** Shows when a subscribed user follows or unfollows another user (actor, target, timestamp).
-    - **Mutes/Unmutes:** Shows when a subscribed user mutes or unmutes another user (actor, target, timestamp).
-    - System messages for connection status and unrecognized event types are also displayed.
-- **Instructions Panel:** A dedicated panel on the right side of the Live Events tab provides clear instructions on how to:
-    - Expose the local application to the internet using `ngrok`.
-    - Construct the correct webhook URL for use with X.
-    - Add the webhook and subscribe users within this dashboard.
+Follow these steps to get the application running locally:
 
-### 4. Backend Functionality
-The Bun.js server handles several key tasks:
-- **Static File Serving:** Serves the `index.html` and static assets (CSS, JS) from the `/public` directory.
-- **API Proxy:** Provides backend API endpoints that proxy requests to the X API v2 (e.g., for fetching webhooks, users, managing subscriptions). This keeps X API credentials secure on the server.
-- **Webhook Event Handling:**
-    - **CRC Checks (GET `/webhooks/twitter`):** Responds to X's CRC validation requests using the `X_CONSUMER_SECRET`.
-    - **Event Receiving (POST `/webhooks/twitter`):** Receives incoming event payloads from X.
-- **Authentication:**
-    - Uses **OAuth 1.0a** (with consumer keys and user access tokens from `.env`) for actions like creating subscriptions.
-    - Uses **Bearer Token** (from `.env`) for read-only actions like fetching webhooks or user details.
-- **WebSocket Server:** Establishes a WebSocket connection with the frontend (`/ws/live-events`) to broadcast incoming X events in real-time to the Live Events tab.
+### 1. Prerequisites
 
-## Tech Stack
+*   **Bun.js:** Ensure you have Bun.js installed. You can find installation instructions at [bun.sh](https://bun.sh).
+*   **X API Credentials:** You will need X API v2 credentials (Consumer Key, Consumer Secret, Access Token, Access Token Secret, Bearer Token) for an app with the Account Activity API enabled.
 
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **Backend:** [Bun.js](https://bun.sh/) (using TypeScript)
-- **X API Version:** v2
-- **Key Libraries:**
-    - `oauth-1.0a` (for backend X API authentication)
-- **Development Tooling:** `ngrok` (recommended for exposing local server)
+### 2. Clone the Repository
 
-## Project Structure
-
-```
-.
-├── .env                # Local environment variables (created from env.template)
-├── .env.template       # Template for environment variables
-├── .gitignore          # Specifies intentionally untracked files
-├── index.html          # Main frontend HTML, CSS, and JavaScript
-├── index.ts            # Bun server (backend logic, API proxy)
-├── package.json        # Project metadata, scripts, and dependencies
-├── bun.lockb           # Bun's lockfile
-├── tsconfig.json       # TypeScript configuration for editor support
-└── README.md           # This file
+```bash
+# Replace with your repository's clone command if applicable
+git clone https://your-repository-url.git
+cd account-activity-dashboard-enterprise
 ```
 
-## Setup and Running the Application
+### 3. Set Up Environment Variables
 
-### Prerequisites
-1.  **Bun:** Ensure you have Bun installed. Visit [bun.sh](https://bun.sh/) for installation instructions.
-2.  **X Developer Account & App:**
-    *   You need an X Developer Account.
-    *   Create an App within your X Developer Portal to obtain API keys and tokens.
-    *   Ensure your App has the necessary permissions for the Account Activity API (or the relevant v2 endpoints for webhooks and user activity). You will need Consumer Keys, and an Access Token & Secret for the user account whose activity you wish to monitor and manage subscriptions for. A Bearer Token is also needed for some v2 endpoints.
-
-### Environment Variables
-1.  **Create `.env` file:**
-    Copy the `env.template` file to a new file named `.env` in the project root.
+*   Copy the environment template file:
     ```bash
     cp env.template .env
     ```
-2.  **Populate `.env`:**
-    Open the `.env` file and fill in your X Developer App credentials:
+*   Edit the `.env` file and fill in your X API credentials:
     ```
-    X_CONSUMER_KEY="YOUR_APP_CONSUMER_KEY"
-    X_CONSUMER_SECRET="YOUR_APP_CONSUMER_SECRET"
-    X_ACCESS_TOKEN="USER_ACCESS_TOKEN_FOR_SUBSCRIPTIONS"
-    X_ACCESS_TOKEN_SECRET="USER_ACCESS_TOKEN_SECRET_FOR_SUBSCRIPTIONS"
-    X_BEARER_TOKEN="YOUR_APP_BEARER_TOKEN"
-    # Optional: PORT=3001 (defaults to 3000 if not set)
+    X_CONSUMER_KEY="YOUR_CONSUMER_KEY"
+    X_CONSUMER_SECRET="YOUR_CONSUMER_SECRET"
+    X_ACCESS_TOKEN="YOUR_ACCESS_TOKEN"
+    X_ACCESS_TOKEN_SECRET="YOUR_ACCESS_TOKEN_SECRET"
+    X_BEARER_TOKEN="YOUR_BEARER_TOKEN"
     ```
-    - `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` should belong to the X user account for which you want to manage webhook subscriptions (i.e., whose activities the webhook will monitor).
 
-### Installation
-Install project dependencies (primarily `oauth-1.0a` and any type definitions Bun pulls in automatically):
+### 4. Install Dependencies
+
+Open your terminal in the project root directory and run:
+
 ```bash
 bun install
 ```
 
-### Running the Application
-1.  **Start the server:**
+This command will install all necessary dependencies defined in `package.json`.
+
+### 5. Run the Application
+
+To start the development server, run:
+
+```bash
+bun run index.ts
+```
+
+Alternatively, if you have a `dev` script in your `package.json` (e.g., `"dev": "bun --watch index.ts"`), you can run:
+
+```bash
+bun run dev
+```
+
+The server will typically start on `http://localhost:3000`.
+
+### 6. Access the Application
+
+Open your web browser and navigate to:
+
+[http://localhost:3000](http://localhost:3000)
+
+You should now see the Account Activity Dashboard interface.
+
+### 7. Setting Up for Live Events (ngrok)
+
+To receive live events from X in the dashboard when running locally, your server needs to be accessible from the public internet. `ngrok` is a recommended tool for this.
+
+1.  **Install ngrok:** If you don't have it, download and install ngrok from [ngrok.com](https://ngrok.com).
+2.  **Expose your local server:** Open a new terminal window and run ngrok to forward to your local Bun server's port (default 3000):
     ```bash
-    bun run index.ts
+    ngrok http http://localhost:3000
     ```
-    (If you have `nodemon` or similar tools configured for Bun, you might use `bun dev` or an equivalent command.)
-2.  **Access the Dashboard:**
-    Open your browser and navigate to `http://localhost:3000` (or the port you specified in `.env`).
-
-### Setting Up Webhooks for Live Events
-To receive live events from X in the dashboard:
-1.  **Expose your local server:**
-    Since the application runs locally, X needs a public URL to send events. Use a tool like `ngrok`.
-    - If you don't have ngrok, download and install it from [ngrok.com](https://ngrok.com/).
-    - Run ngrok to forward to your local Bun server's port (default 3000):
-      ```bash
-      ngrok http http://localhost:3000
-      ```
-    - ngrok will provide a public HTTPS forwarding URL (e.g., `https://your-unique-id.ngrok-free.app`). **Copy this HTTPS URL.**
-
-2.  **Construct your full Webhook URL:**
-    Append `/webhooks/twitter` to your ngrok HTTPS URL.
+    If your application is running on a different port, replace `3000` accordingly.
+3.  **Copy the ngrok URL:** ngrok will display a public HTTPS forwarding URL (e.g., `https://your-unique-id.ngrok-free.app`). Copy this HTTPS URL.
+4.  **Construct your Webhook URL:** Your full webhook URL for X will be the ngrok HTTPS URL followed by `/webhooks/twitter`.
     *Example:* `https://your-unique-id.ngrok-free.app/webhooks/twitter`
+5.  **Add and Configure in Dashboard:**
+    *   Go to the "Webhooks" tab in this dashboard.
+    *   Add the full webhook URL you constructed above.
+    *   Once the webhook is added and validated by X (the dashboard backend handles the CRC check), go to the "Subscriptions" tab to subscribe the desired user to this webhook.
+    *   Navigate to the "Live Events" tab to view incoming events.
 
-3.  **Add the Webhook in the Dashboard:**
-    - Navigate to the "Webhooks" tab in the AAA Dashboard.
-    - Enter the full ngrok-based webhook URL you constructed into the "Add New Webhook" form and submit.
-    - X will send a CRC request to this URL. The backend is set up to handle this. You should see the webhook appear in the list, and ideally, it becomes valid.
+## Development Notes
 
-4.  **Subscribe a User:**
-    - Go to the "Subscriptions" tab.
-    - Select your newly added (and validated) webhook from the dropdown.
-    - Click the "Add Subscription (for user in .env)" button. This will attempt to subscribe the X user (associated with the `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` in your `.env` file) to activity events.
+*   The backend is built with Bun.js and its native HTTP server.
+*   Frontend assets (HTML, CSS, JavaScript) are served from the `public` directory.
+*   API routes are organized under `src/routes/`.
+*   Live events are pushed to the client via WebSockets.
 
-5.  **View Live Events:**
-    - Navigate to the "Live Events" tab.
-    - If the WebSocket connection is successful, any configured activity from the subscribed user should now appear here in real-time.
+## Troubleshooting
 
----
-
-This README should provide a good overview for anyone looking to understand or run the Account Activity Dashboard.
-
-## Future Enhancements (Potential)
-
-*   Implement "Subscriptions" and "Live Events" tabs.
-*   Add user authentication if multiple users need to manage webhooks.
-*   Improve UI/UX styling.
-*   More robust error handling and user feedback.
-*   Client-side and server-side validation for inputs.
-*   Webhook URL specific CRC handling/display within the UI.
-
-## Security Note
-
-This application is currently designed for local development and management by a trusted user who has access to the Bearer Token. Ensure your `.env` file with the Bearer Token is kept secure and not committed to version control if the repository becomes public.
+*   **Permissions:** Ensure your X app has the necessary permissions for the Account Activity API and the specific endpoints being used (e.g., Webhooks, Subscriptions, Direct Messages if applicable).
+*   **`.env` file:** Double-check that your `.env` file is correctly named, located in the project root, and contains the correct credentials.
+*   **ngrok for Live Events:** If you are testing live event ingestion locally, remember to set up ngrok (or a similar tunneling service) and register the ngrok URL with X as described in the "Live Events" tab instructions panel within the application.
