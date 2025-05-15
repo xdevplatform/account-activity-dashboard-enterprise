@@ -12,9 +12,9 @@
             <span class="logo">𝕏</span> AAA Dashboard
         </div>
         <div class="nav-links">
-            <a href="#webhooks" onclick="openTab(event, 'webhooks')">Webhooks</a>
-            <a href="#subscriptions" onclick="openTab(event, 'subscriptions')">Subscriptions</a>
-            <a href="#live-events" onclick="openTab(event, 'live-events')">Live Events</a>
+            <a href="#webhooks" data-tab="webhooks">Webhooks</a>
+            <a href="#subscriptions" data-tab="subscriptions">Subscriptions</a>
+            <a href="#live-events" data-tab="live-events">Live Events</a>
         </div>
         <div class="navbar-brand-spacer">
             <span class="logo">𝕏</span> AAA Dashboard
@@ -69,11 +69,17 @@
     </div>
 
     <div id="live-events" class="tabcontent">
-        <h2>Live Events</h2>
-        <p>Content for Live Events goes here.</p>
+        <div class="tabcontent-centered">
+            <h2>Live X Events</h2>
+            <p>Real-time events from your subscribed webhooks will appear here.</p>
+            <div id="live-events-container" class="event-cards-container">
+                <!-- Live event cards will be appended here -->
+            </div>
+        </div>
     </div>
 
-    <script src="/public/js/subscriptionHandler.js" defer></script>
-    <script src="/public/js/main.js" defer></script>
+    <script src="/public/js/main.js"></script>
+    <script src="/public/js/subscriptionHandler.js"></script>
+    <script src="/public/js/liveEventsHandler.js"></script>
 </body>
 </html> 

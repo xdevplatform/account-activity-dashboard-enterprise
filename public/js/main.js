@@ -1,39 +1,99 @@
-function openTab(evt, tabName) {
-    let i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-        tabcontent[i].classList.remove("active");
+let currentOpenTab = 'webhooks'; // Default tab
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("[MainJS_Debug] DOMContentLoaded event fired.");
+
+    // Set up tab click listeners
+    document.querySelectorAll('.navbar a[data-tab]').forEach((tabLink, index) => {
+        console.log(`[MainJS_Debug] Attaching click listener to: ${tabLink.getAttribute('data-tab')}`);
+        tabLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            console.log(`[MainJS_Debug] Tab link clicked for: ${tabId}`);
+            if (tabId) {
+                showTab(tabId);
+                try {
+                    history.pushState(null, null, '#' + tabId);
+                } catch (e) {
+                    window.location.hash = '#' + tabId;
+                }
+            }
+        });
+    });
+
+    // Handle initial tab based on hash or default
+    console.log("[MainJS_Debug] About to call handleHashChange for initial load.");
+    handleHashChange();
+});
+
+function handleHashChange() {
+    console.log("[MainJS_Debug] handleHashChange called.");
+    const hash = window.location.hash.substring(1);
+    // Validate if the hash corresponds to a real tab ID, otherwise default
+    const validTabIds = Array.from(document.querySelectorAll('.tabcontent')).map(tc => tc.id);
+    const tabToOpen = hash && validTabIds.includes(hash) ? hash : 'webhooks';
+    console.log(`[MainJS] Hash change or initial load. Attempting to show tab: ${tabToOpen}`);
+    showTab(tabToOpen);
+}
+
+window.addEventListener('hashchange', handleHashChange, false);
+
+function showTab(tabId) {
+    console.log(`[MainJS_Debug] showTab function entered for tabId: ${tabId}. Current open tab: ${currentOpenTab}`);
+
+    if (!tabId) {
+        console.error("[MainJS] showTab called with no tabId.");
+        return;
     }
-    // Clear active class from all tab links
-    const navLinksContainer = document.querySelector('.navbar .nav-links');
-    if (navLinksContainer) {
-        tablinks = navLinksContainer.getElementsByTagName("a");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
+
+    // Manage WebSocket connection for LiveEvents tab
+    if (currentOpenTab === 'live-events' && tabId !== 'live-events') {
+        if (typeof window.closeLiveEventsConnection === 'function') {
+            console.log("[MainJS_Debug] Navigating away from LiveEvents. Closing WebSocket connection.");
+            window.closeLiveEventsConnection();
         }
     }
 
-    const activeTabContent = document.getElementById(tabName);
-    if (activeTabContent) {
-        activeTabContent.style.display = "block";
-        activeTabContent.classList.add("active");
-    }
-    
-    if (history.pushState) {
-        history.pushState(null, null, '#' + tabName);
+    // Hide all tab content and remove active class from links
+    document.querySelectorAll('.tabcontent').forEach(content => {
+        content.style.display = 'none'; // Use style.display directly
+        content.classList.remove('active');
+    });
+    document.querySelectorAll('.navbar a[data-tab]').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Show the selected tab content and set active class on link
+    const activeContent = document.getElementById(tabId);
+    const activeLink = document.querySelector(`.navbar a[data-tab="${tabId}"]`);
+
+    if (activeContent) {
+        activeContent.style.display = 'block'; // Use style.display directly
+        activeContent.classList.add('active');
+        console.log(`[MainJS] Tab ${tabId} content displayed.`);
     } else {
-        location.hash = '#' + tabName;
+        console.warn(`[MainJS] No content found for tabId: ${tabId}`);
+    }
+    if (activeLink) {
+        activeLink.classList.add('active');
     }
 
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.classList.add('active');
-    }
+    // Update the currently open tab
+    currentOpenTab = tabId;
+    console.log(`[MainJS_Debug] currentOpenTab is now: ${currentOpenTab}`);
 
-    if (tabName === 'webhooks') {
-        fetchWebhooks();
-    } else if (tabName === 'subscriptions') {
-        initializeSubscriptionsPage();
+    // Initialize tab-specific content
+    if (tabId === 'webhooks') {
+        if (typeof fetchWebhooks === 'function') fetchWebhooks();
+    } else if (tabId === 'subscriptions') {
+        if (typeof initializeSubscriptionsPage === 'function') initializeSubscriptionsPage();
+    } else if (tabId === 'live-events') {
+        if (typeof window.initializeLiveEvents === 'function') {
+            console.log("[MainJS_Debug] LiveEvents tab is active. Initializing WebSocket connection.");
+            window.initializeLiveEvents();
+        } else {
+            console.error("[MainJS_Debug] initializeLiveEvents function not found!");
+        }
     }
 }
 
@@ -313,26 +373,4 @@ function initializeSubscriptionsPage() {
     if (selectElement) {
         selectElement.addEventListener('change', handleSubscriptionWebhookChange);
     }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    let tabToOpen = 'webhooks'; 
-    if (window.location.hash) {
-        const hash = window.location.hash.substring(1);
-        const el = document.getElementById(hash);
-        if (el && el.classList.contains('tabcontent')) {
-            tabToOpen = hash;
-        }
-    }
-    const targetLink = document.querySelector(`.navbar .nav-links a[href="#${tabToOpen}"]`);
-    if (targetLink) {
-        // Directly call openTab with a mocked event target for initial load
-        openTab({ currentTarget: targetLink }, tabToOpen);
-    } else {
-        // Fallback if the hashed tab link isn't found, try opening webhooks directly
-        const webhooksLink = document.querySelector('.navbar .nav-links a[href="#webhooks"]');
-        if (webhooksLink) {
-            openTab({ currentTarget: webhooksLink }, 'webhooks');
-        }
-    }
-}); 
+} 

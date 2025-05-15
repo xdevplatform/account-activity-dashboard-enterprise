@@ -309,3 +309,89 @@ body { font-family: sans-serif; margin: 0; }
     /* width: auto; */
     margin-right: 5px; /* Slightly reduce margin if an issue with wrapping */
 } 
+
+/* Styles for Live Event Cards */
+.event-cards-container {
+    width: 90%; /* Or 100% if you want it to fill the tab content centered area */
+    max-width: 900px; /* Consistent with subscriptions list */
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spacing between cards */
+}
+
+.event-card {
+    background-color: #fff; /* White background for cards */
+    border: 1px solid #e1e8ed; /* Twitter-like border color */
+    border-radius: 8px;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.event-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #14171a; /* Twitter's dark text color */
+}
+
+.event-card p {
+    margin: 4px 0;
+    font-size: 0.95em;
+    color: #5b7083; /* Twitter's secondary text color */
+}
+
+.event-card p strong {
+    color: #14171a;
+}
+
+.event-card pre {
+    background-color: #f5f8fa;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: pre-wrap; /* Wrap long lines */
+    word-break: break-all;
+    max-height: 200px; /* Limit height of raw JSON */
+    overflow-y: auto;   /* Scroll if too long */
+}
+
+.event-card small {
+    font-size: 0.8em;
+    color: #8899a6; /* Twitter's timestamp color */
+}
+
+/* Specific card type styling - just background examples */
+.event-card-system {
+    background-color: #e6f3ff; /* Light blue for system messages */
+    border-left: 5px solid #1d9bf0;
+}
+
+.event-card-tweet-create {
+    border-left: 5px solid #17bf63; /* Green for new tweets */
+}
+
+.event-card-tweet-delete {
+    border-left: 5px solid #e0245e; /* Red for deletions */
+}
+
+.event-card-favorite {
+    border-left: 5px solid #ffad1f; /* Yellow/Orange for favorites */
+}
+
+.event-card-follow {
+    border-left: 5px solid #1da1f2; /* Twitter blue for follows */
+}
+
+.event-card-unfollow {
+    border-left: 5px solid #aab8c2; /* Lighter grey for unfollows */
+}
+
+.event-card-mute {
+    border-left: 5px solid #f58ea8; /* A pink/purple shade for mutes */
+}
+
+.event-card-unmute {
+    border-left: 5px solid #7857f3; /* A distinct purple for unmutes */
+} 
