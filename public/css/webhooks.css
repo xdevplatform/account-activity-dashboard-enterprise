@@ -1,0 +1,163 @@
+#webhooks-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 1200px;
+}
+#webhooks-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+#webhooks-list li p {
+    margin: 5px 0;
+}
+#webhooks-list li strong {
+    display: inline-block;
+    width: 120px; 
+}
+
+.webhook-card-content {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.webhook-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    flex-shrink: 0;
+}
+
+.webhook-card-actions button img {
+    display: block; /* Remove extra space below image */
+    width: 16px; /* Desired icon width */
+    height: 16px; /* Desired icon height */
+}
+
+.delete-webhook-btn {
+    background-color: transparent; 
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; /* Adjust padding for icon */
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; /* Use inline-flex to center SVG */
+    align-items: center; /* Center SVG vertically */
+    justify-content: center; /* Center SVG horizontally */
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+}
+.delete-webhook-btn:hover {
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.validate-webhook-btn {
+    background-color: transparent; 
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+    position: relative; /* For spinner positioning context if re-added to button */
+}
+.validate-webhook-btn:hover {
+    background-color: rgba(33, 150, 243, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.replay-webhook-btn {
+    background-color: transparent; 
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-left: 0; 
+    margin-bottom: 0; 
+    cursor: pointer;
+    border-radius: 3px; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+}
+
+.replay-webhook-btn:hover {
+    background-color: rgba(40, 167, 69, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+#add-webhook-form {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    width: 80%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; 
+}
+#add-webhook-form h3 {
+    margin-top: 0;
+    text-align: center;
+}
+#add-webhook-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: left;
+}
+#webhook-url-input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+#add-webhook-btn {
+    background-color: #4CAF50; 
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#add-webhook-btn:hover {
+    background-color: #45a049;
+}
+
+/* Styles for the status container within the validation modal */
+#validate-webhook-status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px; /* Give it some space */
+    margin: 15px 0;
+    font-size: 0.9em;
+} 

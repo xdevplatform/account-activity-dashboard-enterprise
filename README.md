@@ -1,149 +1,118 @@
-# account-activity-dashboard-enterprise
+# Account Activity API Dashboard (AAA Dashboard)
 
-Sample web app and helper scripts to get started with Twitter's enterprise Account Activity API (All Activities). Written in Node.js. Full documentation for this API can be found on the [Account Activity API reference](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview).
+A Bun.js web application to monitor and manage X (formerly Twitter) Account Activity API webhooks, subscriptions, and live events.
 
-Enterprise Account Activity API differs from the Premium Account Activity API in the following ways
-* Request a redelivery of events, up to the past five days, through the Enterprise Account Activity Replay API
-* Up to 500+ unique subscriptions vs 250 for premium
-* Three or more webhooks vs one webhook for premium
+## Features
 
-## Dependencies
+*   **Webhooks Management:**
+    *   List registered webhooks.
+    *   Add new webhooks.
+    *   Delete existing webhooks.
+    *   Validate webhooks (CRC check).
+    *   Replay events for a webhook within a specified date/time range.
+*   **Subscriptions Management:**
+    *   List user subscriptions for a selected webhook.
+    *   Add new subscriptions (for the user specified in `.env`).
+    *   Delete user subscriptions.
+*   **Live Events Viewer:**
+    *   Real-time stream of events via WebSockets.
+    *   Supports various event types: Tweet create/delete, Favorite, Follow/Unfollow, Mute/Unmute, Replay job status, Direct Messages (received, sent, typing indicator, read receipts).
+    *   Instructions panel for setting up ngrok to receive events locally.
 
-* A Twitter app created on [developer.twitter.com](https://developer.twitter.com/en/apps), enabled for access to the Account Activity API
-* [Node.js](https://nodejs.org)
-* [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) or other webhost (optional)
-* [ngrok](https://ngrok.com/) or other tunneling service (optional)
+## Quick Start
 
-## Create and configure a Twitter app
+Follow these steps to get the application running locally:
 
-1. Create a Twitter app on [Twitter Developer](https://developer.twitter.com/en/apps)
+### 1. Prerequisites
 
-2. On the **Permissions** tab ➡️ **Edit** ➡️ **Access permission** section ➡️ enable **Read, Write and direct messages**.
+*   **Bun.js:** Ensure you have Bun.js installed. You can find installation instructions at [bun.sh](https://bun.sh).
+*   **X API Credentials:** You will need X API v2 credentials (Consumer Key, Consumer Secret, Access Token, Access Token Secret, Bearer Token) for an app with the Account Activity API enabled.
 
-3. On the **Keys and Tokens** tab ➡️ **Access token & access token secret** section ➡️ click **Create** button.
+### 2. Clone the Repository
 
-4. On the **Keys and Tokens** tab, take note of the **consumer API key**, **consumer API secret**, **access token** and **access token secret**.
+```bash
+# Replace with your repository's clone command if applicable
+git clone https://your-repository-url.git
+cd account-activity-dashboard-enterprise
+```
 
-## Setup & run the Node.js web app
+### 3. Set Up Environment Variables
 
-1. Clone this repository:
-
+*   Copy the environment template file:
     ```bash
-    git clone https://github.com/twitterdev/account-activity-dashboard.git
+    cp env.template .env
+    ```
+*   Edit the `.env` file and fill in your X API credentials:
+    ```
+    X_CONSUMER_KEY="YOUR_CONSUMER_KEY"
+    X_CONSUMER_SECRET="YOUR_CONSUMER_SECRET"
+    X_ACCESS_TOKEN="YOUR_ACCESS_TOKEN"
+    X_ACCESS_TOKEN_SECRET="YOUR_ACCESS_TOKEN_SECRET"
+    X_BEARER_TOKEN="YOUR_BEARER_TOKEN"
     ```
 
-2. Install Node.js dependencies:
+### 4. Install Dependencies
 
+Open your terminal in the project root directory and run:
+
+```bash
+bun install
+```
+
+This command will install all necessary dependencies defined in `package.json`.
+
+### 5. Run the Application
+
+To start the development server, run:
+
+```bash
+bun run index.ts
+```
+
+Alternatively, if you have a `dev` script in your `package.json` (e.g., `"dev": "bun --watch index.ts"`), you can run:
+
+```bash
+bun run dev
+```
+
+The server will typically start on `http://localhost:3000`.
+
+### 6. Access the Application
+
+Open your web browser and navigate to:
+
+[http://localhost:3000](http://localhost:3000)
+
+You should now see the Account Activity Dashboard interface.
+
+### 7. Setting Up for Live Events (ngrok)
+
+To receive live events from X in the dashboard when running locally, your server needs to be accessible from the public internet. `ngrok` is a recommended tool for this.
+
+1.  **Install ngrok:** If you don't have it, download and install ngrok from [ngrok.com](https://ngrok.com).
+2.  **Expose your local server:** Open a new terminal window and run ngrok to forward to your local Bun server's port (default 3000):
     ```bash
-    npm install
+    ngrok http http://localhost:3000
     ```
+    If your application is running on a different port, replace `3000` accordingly.
+3.  **Copy the ngrok URL:** ngrok will display a public HTTPS forwarding URL (e.g., `https://your-unique-id.ngrok-free.app`). Copy this HTTPS URL.
+4.  **Construct your Webhook URL:** Your full webhook URL for X will be the ngrok HTTPS URL followed by `/webhooks/twitter`.
+    *Example:* `https://your-unique-id.ngrok-free.app/webhooks/twitter`
+5.  **Add and Configure in Dashboard:**
+    *   Go to the "Webhooks" tab in this dashboard.
+    *   Add the full webhook URL you constructed above.
+    *   Once the webhook is added and validated by X (the dashboard backend handles the CRC check), go to the "Subscriptions" tab to subscribe the desired user to this webhook.
+    *   Navigate to the "Live Events" tab to view incoming events.
 
-3. Pass your Twitter keys, tokens and webhook environment name as environment variables. Twitter keys and access tokens are found on your app page on your [App Dashboard](https://developer.twitter.com/apps). The basic auth properties can be anything you want, and are used for simple password protection to access the configuration UI. As an alternative, instead of setting up env variables, you can copy the `env.template` file into a file named `.env` and and add these details there.
+## Development Notes
 
-   ```bash
-   TWITTER_CONSUMER_KEY= # your consumer key
-   TWITTER_CONSUMER_SECRET= # your consumer secret
-   TWITTER_ACCESS_TOKEN= # your access token
-   TWITTER_ACCESS_TOKEN_SECRET= # your access token secret
-   BASIC_AUTH_USER= # your basic auth user
-   BASIC_AUTH_PASSWORD= # your basic auth password
-   ```
+*   The backend is built with Bun.js and its native HTTP server.
+*   Frontend assets (HTML, CSS, JavaScript) are served from the `public` directory.
+*   API routes are organized under `src/routes/`.
+*   Live events are pushed to the client via WebSockets.
 
+## Troubleshooting
 
-
-4. Run locally:
-
-    ```bash
-    npm start
-    ```
-
-5. Deploy app or setup a tunnel to localhost. To deploy to Heroku see "Deploy to Heroku" instructions below. To setup a tunnel use something like [ngrok](https://ngrok.com/).
-
-    Take note of your webhook URL. For example:
-
-    ```text
-    https://your.app.domain/webhook/twitter
-    ```
-
-6. Take note of the deployed URL, revisit your developer.twitter.com Apps **Settings** page, and add the following URL values as whitelisted Callback URLs:
-
-    ```text
-    http(s)://your.app.domain/callbacks/addsub
-    http(s)://your.app.domain/callbacks/removesub
-    ```
-
-## Configure webhook to receive events
-
-To configure your webhook you can use this apps' web UI, or use the example scripts from the command line.
-
-### Using the web UI
-
-Load the web app in your browser and follow the instructions below.
-
-1. Setup webhook config. Navigate to the "manage webhook" view. Enter your webhook URL noted earlier and click "Create/Update."
-
-2. Add a user subscription. Navigate to the "manage subscriptions" view. Click "add" and proceed with Twitter sign-in. Once complete your webhook will start to receive account activity events for the user.
-
-### Using the command line example scripts
-
-These scripts should be executed from root of the project folder. Your url or webhook ID should be passed in as command line arguments.
-
-1. Create webhook config.
-
-    ```bash
-    node example_scripts/webhook_management/create-webhook-config.js -e <environment> -u <url>
-    ```
-
-2. Add a user subscription for the user that owns the app.
-
-    ```bash
-    node example_scripts/subscription_management/add-subscription-app-owner.js -e <environment>
-    ```
-
-3. To add a user subscription for another user using PIN-based Twitter sign-in.
-
-    ```bash
-    node example_scripts/subscription_management/add-subscription-other-user.js -e <environment>
-    ```
-
-**Note:** More example scripts can be found in the [example_scripts](example_scripts) directory to:
-
-* Create, delete, retrieve and validate webhook configs.
-* Add, remove, retrieve, count and list user subscriptions.
-
-## Deploy to Heroku (optional)
-
-1. Init Heroku app.
-
-    ```bash
-    heroku create
-    ```
-
-2. Run locally.
-
-    ```text
-    heroku local
-    ```
-
-3. Configure environment variables for each  See Heroku documentation on [Configuration and Config Vars](https://devcenter.heroku.com/articles/config-vars).
-
-4. Deploy to Heroku.
-
-    ```bash
-    git push heroku master
-    ```
-
-**Note:** The free tier of Heroku will put your app to sleep after 30 minutes. On cold start, you app will have very high latency which may result in a CRC failure that deactivates your webhook. To trigger a challenge response request and re-validate, run the following script.
-
-node example_scripts/webhook_management/validate-webhook-config.js -i <webhook_id>
-
-## Production considerations
-
-This app is for demonstration purposes only, and should not be used in production without further modifcations. Dependencies on databases, and other types of services are intentionally not within the scope of this sample app. Some considerations below:
-
-* With this basic application, user information is stored in server side sessions. This may not provide the best user experience or be the best solution for your use case, especially if you are adding more functionality.
-* The application can handle light usage, but you may experience API rate limit issues under heavier load. Consider storing data locally in a secure database, or caching requests.
-* To support multiple users (admins, team members, customers, etc), consider implementing a form of Access Control List for better security.
-
-# Security Issues?
-Please report sensitive security issues via Twitter's bug-bounty program (https://hackerone.com/twitter) rather than GitHub.
+*   **Permissions:** Ensure your X app has the necessary permissions for the Account Activity API and the specific endpoints being used (e.g., Webhooks, Subscriptions, Direct Messages if applicable).
+*   **`.env` file:** Double-check that your `.env` file is correctly named, located in the project root, and contains the correct credentials.
+*   **ngrok for Live Events:** If you are testing live event ingestion locally, remember to set up ngrok (or a similar tunneling service) and register the ngrok URL with X as described in the "Live Events" tab instructions panel within the application.

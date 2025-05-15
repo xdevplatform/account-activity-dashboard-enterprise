@@ -1,0 +1,714 @@
+body { font-family: sans-serif; margin: 0; }
+.navbar {
+    background-color: #333;
+    overflow: hidden; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+}
+.navbar-brand {
+    display: block;
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 1.2em; 
+}
+.navbar-brand .logo {
+    font-weight: bold; 
+}
+.nav-links {
+    display: flex;
+    justify-content: center; 
+}
+.navbar a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.navbar a:hover { background-color: #ddd; color: black; }
+.navbar a.active { background-color: #555; } 
+.tabcontent { display: none; padding: 20px; }
+.tabcontent.active { display: block; }
+
+.tabcontent-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; 
+}
+
+#webhooks-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 1200px;
+}
+#webhooks-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+#webhooks-list li p {
+    margin: 5px 0;
+}
+#webhooks-list li strong {
+    display: inline-block;
+    width: 120px; 
+}
+
+.webhook-card-content {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.webhook-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    flex-shrink: 0;
+}
+
+.webhook-card-actions button img {
+    display: block; /* Remove extra space below image */
+    width: 16px; /* Desired icon width */
+    height: 16px; /* Desired icon height */
+}
+
+.delete-webhook-btn {
+    background-color: transparent; 
+    /* color: #f44336; Removed as SVG has its own color or will be styled */
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; /* Adjust padding for icon */
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; /* Use inline-flex to center SVG */
+    align-items: center; /* Center SVG vertically */
+    justify-content: center; /* Center SVG horizontally */
+    /* font-size: 16px; Removed as it's an image now */
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; /* Button width (16px icon + 5px padding*2 + 1px border*2 approx) */
+    height: 28px; /* Button height */
+}
+.delete-webhook-btn:hover {
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.validate-webhook-btn {
+    background-color: transparent; 
+    /* color: #2196F3; Removed */
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    /* font-size: 16px; Removed */
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+    position: relative; /* Added for spinner positioning context */
+}
+.validate-webhook-btn:hover {
+    background-color: rgba(33, 150, 243, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+/* Styles for the new Replay button on webhook cards */
+.replay-webhook-btn {
+    background-color: transparent; 
+    /* color: #28a745; Removed */
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    /* font-size: 16px; Removed */
+    margin-left: 0; 
+    margin-bottom: 0; 
+    cursor: pointer;
+    border-radius: 3px; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+}
+
+.replay-webhook-btn:hover {
+    background-color: rgba(40, 167, 69, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.navbar-brand-spacer {
+    visibility: hidden;
+    display: block;
+    color: white; 
+    padding: 14px 16px; 
+    font-size: 1.2em; 
+    text-decoration: none; 
+}
+.navbar-brand-spacer .logo {
+    font-weight: bold; 
+}
+
+#add-webhook-form {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    width: 80%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; 
+}
+#add-webhook-form h3 {
+    margin-top: 0;
+    text-align: center;
+}
+#add-webhook-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: left;
+}
+#webhook-url-input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+#add-webhook-btn {
+    background-color: #4CAF50; 
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#add-webhook-btn:hover {
+    background-color: #45a049;
+}
+
+.code-block-value {
+    background-color: #f6f8fa; 
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid #eaecef;
+    font-size: 0.9em;
+    color: #24292e; 
+    word-break: break-all; 
+}
+
+.code-block-value a {
+    color: #0366d6; 
+    text-decoration: none;
+}
+.code-block-value a:hover {
+    text-decoration: underline;
+} 
+
+/* Styling for Subscriptions List - similar to Webhooks List */
+#subscriptions-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 900px; /* Increased from 800px */
+}
+
+#subscriptions-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px; /* Decreased from 15px */
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left; 
+    overflow: hidden; /* In case buttons are floated later */
+    min-width: 450px; /* Increased from 350px */
+    /* max-width can still be controlled by the parent ul if needed */
+}
+
+#subscriptions-list li p {
+    margin: 5px 0;
+}
+
+#subscriptions-list li strong {
+    display: inline-block;
+    width: auto; /* Or e.g., width: 70px; */
+    margin-right: 10px; /* Add some spacing between label and value */
+}
+
+/* Styling for the Delete Subscription button */
+.delete-subscription-btn {
+    background-color: transparent; 
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; /* Adjust padding for icon */
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; /* Use inline-flex to center SVG */
+    align-items: center; /* Center SVG vertically */
+    justify-content: center; /* Center SVG horizontally */
+    border-radius: 4px;
+    cursor: pointer;
+    float: right; 
+    margin-left: 10px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; /* Button width */
+    height: 28px; /* Button height */
+}
+
+.delete-subscription-btn:hover {
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.delete-subscription-btn img {
+    display: block; /* Remove extra space below image */
+    width: 16px; /* Icon width */
+    height: 16px; /* Icon height */
+}
+
+.avatar-img {
+    width: 48px; /* _bigger is 73x73, but 48px is common for avatars in lists */
+    height: 48px;
+    border-radius: 50%; /* Circular avatar */
+    border: 1px solid #ddd;
+    vertical-align: middle; /* Align with text if next to it */
+    margin-top: 5px;
+} 
+
+/* New styles for user card layout */
+.user-card-layout {
+    display: flex;
+    align-items: center; /* Vertically center items */
+}
+
+.user-avatar-container {
+    flex-shrink: 0; /* Prevent avatar container from shrinking */
+    margin-right: 15px; /* Space between avatar and text info */
+}
+
+.user-avatar-container .avatar-img {
+    /* Ensure avatar styles from before are still applied if needed, or adjust */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    display: block; /* Prevents extra space below image */
+}
+
+.avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: #777;
+}
+/* Optional: Add placeholder text if image fails to load, e.g. initials */
+/* .avatar-placeholder::before { content: "N/A"; } */
+
+.user-info-container {
+    flex-grow: 1; /* Allow text info to take remaining space */
+    display: flex;
+    flex-direction: column; /* Stack p tags vertically */
+    justify-content: center; /* Vertically center the text lines relative to each other */
+}
+
+.user-info-container p {
+    margin: 1px 0; /* Decreased from 2px 0 */
+}
+
+.user-info-container .user-handle {
+    font-weight: bold;
+    font-size: 1.1em; /* Make handle slightly larger */
+    color: #333;
+    margin-bottom: 2px; /* Space between handle and subtext */
+}
+
+.user-info-container .user-id-subtext {
+    font-size: 0.85em; /* Smaller font for subtext */
+    color: #666; /* Lighter color for subtext */
+    margin-top: 0;
+}
+
+/* Ensure the user-details-placeholder itself doesn't add unwanted padding/margins */
+.user-details-placeholder {
+    /* If it had any specific styling that conflicted, reset or adjust here */
+}
+
+/* Adjustments to subscription list item if needed */
+#subscriptions-list li .user-details-placeholder + div {
+    /* This was an old selector that might not be relevant */
+    /* clear: both; */ 
+}
+
+#subscriptions-list li strong {
+    /* display: inline-block; */ /* May not be needed if flex handles alignment */
+    /* width: auto; */
+    margin-right: 5px; /* Slightly reduce margin if an issue with wrapping */
+} 
+
+/* Styles for Live Event Cards */
+.event-cards-container {
+    width: 90%; /* Or 100% if you want it to fill the tab content centered area */
+    max-width: 900px; /* Consistent with subscriptions list */
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spacing between cards */
+}
+
+.event-card {
+    background-color: #fff; /* White background for cards */
+    border: 1px solid #e1e8ed; /* Twitter-like border color */
+    border-radius: 8px;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.event-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #14171a; /* Twitter's dark text color */
+}
+
+.event-card p {
+    margin: 4px 0;
+    font-size: 0.95em;
+    color: #5b7083; /* Twitter's secondary text color */
+}
+
+.event-card p strong {
+    color: #14171a;
+}
+
+.event-card pre {
+    background-color: #f5f8fa;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: pre-wrap; /* Wrap long lines */
+    word-break: break-all;
+    max-height: 200px; /* Limit height of raw JSON */
+    overflow-y: auto;   /* Scroll if too long */
+}
+
+.event-card small {
+    font-size: 0.8em;
+    color: #8899a6; /* Twitter's timestamp color */
+}
+
+/* Specific card type styling - just background examples */
+.event-card-system {
+    background-color: #e6f3ff; /* Light blue for system messages */
+    border-left: 5px solid #1d9bf0;
+}
+
+.event-card-tweet-create {
+    border-left: 5px solid #17bf63; /* Green for new tweets */
+}
+
+.event-card-tweet-delete {
+    border-left: 5px solid #e0245e; /* Red for deletions */
+}
+
+.event-card-favorite {
+    border-left: 5px solid #ffad1f; /* Yellow/Orange for favorites */
+}
+
+.event-card-follow {
+    border-left: 5px solid #1da1f2; /* Twitter blue for follows */
+}
+
+.event-card-unfollow {
+    border-left: 5px solid #aab8c2; /* Lighter grey for unfollows */
+}
+
+.event-card-mute {
+    border-left: 5px solid #f58ea8; /* A pink/purple shade for mutes */
+}
+
+.event-card-unmute {
+    border-left: 5px solid #7857f3; /* A distinct purple for unmutes */
+}
+
+.event-card-replay-status {
+    border-left: 5px solid #6c757d; /* Bootstrap secondary/gray color for general status */
+    background-color: #f8f9fa; /* Light gray background */
+}
+
+/* Layout for Live Events Tab (Cards + Instructions) */
+.live-events-layout-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%; /* Occupy full width of its parent (.tabcontent-centered) */
+    gap: 20px; /* Space between event cards area and instructions panel */
+    margin-top: 15px;
+}
+
+/* Adjust event-cards-container if it's now part of the flex layout */
+#live-events-container.event-cards-container {
+    flex-grow: 3; /* Takes up ~75% of the space if instructions panel is flex-grow: 1 */
+    flex-basis: 0; /* Allows flex-grow to distribute space properly */
+    max-width: none; /* Let flexbox handle it */
+    width: auto; /* Let flexbox handle it */
+    border-right: 1px solid #ccd6dd; /* Subtle dividing line */
+    padding-right: 10em; /* Add some padding so content isn't flush with the line */
+    padding-left: 10em; /* Added left padding */
+}
+
+.instructions-panel {
+    flex-grow: 1; /* Takes up ~25% of the space */
+    flex-basis: 0; /* Allows flex-grow to distribute space properly */
+    background-color: #f5f8fa; /* Light background */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e8ed;
+    text-align: left;
+    height: fit-content; /* Adjust height to content, or set a fixed one with overflow */
+    overflow-y: auto; /* If content is too long */
+    max-height: 70vh; /* Example max height, adjust as needed */
+}
+
+.instructions-panel h4 {
+    margin-top: 0;
+    color: #14171a;
+}
+
+.instructions-panel h5 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #14171a;
+}
+
+.instructions-panel p {
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #5b7083;
+    margin-bottom: 10px;
+}
+
+.instructions-panel code {
+    background-color: #e1e8ed;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 0.9em;
+}
+
+.instructions-panel pre.code-block-value {
+    white-space: pre-wrap; /* Ensure ngrok command wraps */
+    word-break: break-all;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.instructions-panel a {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.instructions-panel a:hover {
+    text-decoration: underline;
+} 
+
+/* General Modal Styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; 
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%; 
+    max-width: 500px; 
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal p {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.modal .form-group {
+    margin-bottom: 15px;
+}
+
+.modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.modal .form-group input[type="datetime-local"] {
+    width: calc(100% - 16px); 
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.modal-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.modal-button:hover {
+    background-color: #0056b3;
+}
+
+.modal-message {
+    margin-top: 15px;
+    font-size: 0.9em;
+    min-height: 20px; 
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end; 
+    gap: 10px; 
+}
+
+.modal-button-cancel {
+    background-color: #6c757d; 
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.modal-button-cancel:hover {
+    background-color: #5a6268;
+}
+
+.modal-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #007bff; 
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+}
+
+.replay-modal-content {}
+
+/* CSS Spinner animation keyframes */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* General button loading (if an icon is hidden and spinner shown on button itself) */
+.button-loading img {
+    visibility: hidden;
+}
+
+.button-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px; 
+    height: 16px; 
+    box-sizing: border-box; 
+    transform: translate(-50%, -50%); 
+    border: 2px solid rgba(0, 0, 0, 0.1); 
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Commented out as it was specific and the button itself no longer shows spinner */
+/* .validate-webhook-btn.button-loading::after { */
+    /* border-left-color: #2196F3; */ 
+/* } */
+
+/* Styles for the status container within the validation modal */
+#validate-webhook-status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px; /* Give it some space */
+    margin: 15px 0;
+    font-size: 0.9em;
+} 

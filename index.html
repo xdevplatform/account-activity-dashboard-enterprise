@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activity Dashboard</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="/public/css/webhooks.css">
+    <link rel="stylesheet" href="/public/css/subscriptions.css">
+    <link rel="stylesheet" href="/public/css/live-events.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <span class="logo">𝕏</span> AAA Dashboard
+        </div>
+        <div class="nav-links">
+            <a href="#webhooks" data-tab="webhooks">Webhooks</a>
+            <a href="#subscriptions" data-tab="subscriptions">Subscriptions</a>
+            <a href="#live-events" data-tab="live-events">Live Events</a>
+        </div>
+        <div class="navbar-brand-spacer">
+            <span class="logo">𝕏</span> AAA Dashboard
+        </div>
+    </div>
+
+    <div id="webhooks" class="tabcontent active">
+        <div class="tabcontent-centered">
+            <h2>Webhooks</h2>
+            <p>Manage your registered webhook URLs.</p>
+            <div class="webhooks-actions">
+                <button id="refresh-webhooks-btn">Refresh List</button>
+            </div>
+            <div id="webhooks-loading" style="display: none;">Loading webhooks...</div>
+            <ul id="webhooks-list"></ul>
+            <div id="webhooks-error" style="display: none; color: red;"></div>
+
+            <div id="add-webhook-form">
+                <h3>Add New Webhook</h3>
+                <label for="webhook-url-input">Webhook URL:</label>
+                <input type="url" id="webhook-url-input" placeholder="https://your-domain.com/webhook/twitter" required>
+                <button id="add-webhook-btn" onclick="handleAddWebhook()">Add Webhook</button>
+                <div id="add-webhook-message" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="subscriptions" class="tabcontent">
+        <div class="tabcontent-centered">
+            <h2>Manage Subscriptions</h2>
+            <p>Subscriptions are managed per webhook. Select a webhook to view or manage its subscriptions.</p>
+            
+            <div id="webhook-selector-container" style="margin-bottom: 20px; width: 80%; max-width: 600px;">
+                <label for="webhook-select-for-subscriptions" style="display: block; margin-bottom: 5px; text-align: left; font-weight: bold;">Select Webhook:</label>
+                <select id="webhook-select-for-subscriptions" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Loading webhooks...</option>
+                </select>
+                <div id="webhook-select-error" style="color: red; margin-top: 5px; text-align: left;"></div>
+                <button id="refresh-subscriptions-btn" style="margin-top: 10px;">Refresh Subscriptions</button>
+            </div>
+
+            <div id="subscriptions-list-container">
+                <!-- Subscription list and management UI will go here -->
+                <p>Please select a webhook to see subscriptions.</p>
+            </div>
+
+            <div id="add-subscription-form" style="margin-top: 20px;">
+                <h3>Add New Subscription</h3>
+                <!-- <label for="subscription-user-id-input">User ID to subscribe:</label> -->
+                <!-- <input type="text" id="subscription-user-id-input" placeholder="Enter User ID (e.g., 123456789)" style="margin-right: 10px; padding: 8px; min-width: 200px;"> -->
+                <button id="add-subscription-btn" onclick="handleAddSubscription()">Add Subscription (for user in .env)</button>
+                <div id="add-subscription-message" style="margin-top: 10px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="live-events" class="tabcontent">
+        <div class="tabcontent-centered">
+            <h2>Live X Events</h2>
+            
+            <div class="live-events-layout-container"> 
+                <div id="live-events-container" class="event-cards-container">
+                    <p><i>Attempting to connect to live event stream...</i></p>
+                    <!-- Live event cards will be appended here -->
+                </div>
+
+                <div id="live-events-instructions-panel" class="instructions-panel">
+                    <h4>Live Events Setup Instructions</h4>
+                    <p>To receive live events in this dashboard, you need to register a webhook with X that points to this application.</p>
+                    
+                    <h5>1. Expose Your Local Server</h5>
+                    <p>Since this app is running locally (e.g., on <code>http://localhost:3000</code>), you'll need a tool to expose it to the internet. We recommend <a href="https://ngrok.com/" target="_blank">ngrok</a>.</p>
+                    <p>Install ngrok, then run the following command in your terminal:</p>
+                    <pre class="code-block-value">ngrok http http://localhost:3000</pre>
+                    <p>Ngrok will give you a public forwarding URL (e.g., <code>https://xxxx-xx-xxx-xx-xx.ngrok-free.app</code>). Copy this HTTPS URL.</p>
+
+                    <h5>2. Construct Your Webhook URL</h5>
+                    <p>Your full webhook URL for X will be the ngrok HTTPS URL followed by <code>/webhooks/twitter</code>.</p>
+                    <p>Example: <code>https://your-ngrok-url.ngrok-free.app/webhooks/twitter</code></p>
+
+                    <h5>3. Add the Webhook in this Dashboard</h5>
+                    <p>Go to the "Webhooks" tab in this dashboard and add the full webhook URL you constructed above.</p>
+                    
+                    <h5>4. Subscribe to Events</h5>
+                    <p>Once the webhook is added and validated (X will perform a CRC check against <code>/webhooks/twitter</code>), go to the "Subscriptions" tab to subscribe the desired user to this webhook.</p>
+
+                    <h5>5. View Live Events</h5>
+                    <p>Return to this "Live Events" tab. Any subscribed events for the user should appear here in real-time.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Replay Events Modal -->
+    <div id="replay-events-modal" class="modal">
+        <div class="modal-content replay-modal-content">
+            <span class="close-button" onclick="closeReplayModal()">&times;</span>
+            <h3>Create Replay Job</h3>
+            <p>Select the start and end date/time (local) for replaying events for this webhook. Events can be replayed from the last 15 days.</p>
+            <div class="form-group">
+                <label for="replay-from-datetime">From:</label>
+                <input type="datetime-local" id="replay-from-datetime" name="replay-from-datetime">
+            </div>
+            <div class="form-group">
+                <label for="replay-to-datetime">To:</label>
+                <input type="datetime-local" id="replay-to-datetime" name="replay-to-datetime">
+            </div>
+            <button onclick="handleConfirmReplay()" class="modal-button">Confirm Replay</button>
+            <p id="replay-message" class="modal-message"></p>
+        </div>
+    </div>
+
+    <!-- Validate Webhook Modal -->
+    <div id="validate-webhook-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeValidateWebhookModal()">&times;</span>
+            <h3>Confirm Webhook Validation</h3>
+            <p>Are you sure you want to send a CRC validation request to this webhook endpoint? Ensure your endpoint is ready to handle the CRC check.</p>
+            <div id="validate-webhook-status-container">
+                <!-- Animation and messages will go here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="handleConfirmValidateWebhook()" id="confirm-validate-webhook-btn" class="modal-button">Confirm Validation</button>
+                <button onclick="closeValidateWebhookModal()" class="modal-button-cancel">Cancel</button>
+            </div>
+            <p id="validate-webhook-message" class="modal-message"></p>
+        </div>
+    </div>
+
+    <script src="/public/js/main.js"></script>
+    <script src="/public/js/subscriptionHandler.js"></script>
+    <script src="/public/js/liveEventsHandler.js"></script>
+</body>
+</html> 
