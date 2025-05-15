@@ -30,10 +30,10 @@ function createEventCard(eventData) {
         const tweetEvent = eventData.tweet_create_events[0];
         const user = tweetEvent.user;
         content = `
-            <h4>New Tweet</h4>
+            <h4>New Post</h4>
             <p><strong>From:</strong> ${user.name} (@${user.screen_name})</p>
-            <p><strong>Tweet:</strong> ${tweetEvent.text}</p>
-            <p><small>Tweet ID: ${tweetEvent.id_str}</small></p>
+            <p><strong>Post:</strong> ${tweetEvent.text}</p>
+            <p><small>Post ID: ${tweetEvent.id_str}</small></p>
             <p><small>User ID: ${user.id_str}</small></p>
             <p><small>Posted At: ${formatTwitterTimestamp(tweetEvent.created_at)}</small></p>
             <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
@@ -42,8 +42,8 @@ function createEventCard(eventData) {
     } else if (eventData.tweet_delete_events && eventData.tweet_delete_events.length > 0) {
         const deleteEvent = eventData.tweet_delete_events[0];
         content = `
-            <h4>Tweet Deleted</h4>
-            <p><strong>Tweet ID:</strong> ${deleteEvent.status.id}</p>
+            <h4>Post Deleted</h4>
+            <p><strong>Post ID:</strong> ${deleteEvent.status.id}</p>
             <p><strong>User ID:</strong> ${deleteEvent.status.user_id}</p>
             <p><small>Event Timestamp (UTC ms): ${deleteEvent.timestamp_ms}</small></p>
             <p><small>Processed: ${new Date(parseInt(deleteEvent.timestamp_ms)).toLocaleString()}</small></p>
@@ -53,10 +53,10 @@ function createEventCard(eventData) {
     } else if (eventData.favorite_events && eventData.favorite_events.length > 0) {
         const favEvent = eventData.favorite_events[0];
         content = `
-            <h4>Tweet Favorited</h4>
-            <p><strong>User:</strong> ${favEvent.user.name} (@${favEvent.user.screen_name}) favorited a tweet.</p>
-            <p><strong>Favorited Tweet ID:</strong> ${favEvent.favorited_status.id_str}</p>
-            <p><strong>Favorited Tweet User:</strong> @${favEvent.favorited_status.user.screen_name}</p>
+            <h4>Post Favorited</h4>
+            <p><strong>User:</strong> ${favEvent.user.name} (@${favEvent.user.screen_name}) favorited a post.</p>
+            <p><strong>Favorited Post ID:</strong> ${favEvent.favorited_status.id_str}</p>
+            <p><strong>Favorited Post User:</strong> @${favEvent.favorited_status.user.screen_name}</p>
             <p><small>Event At: ${formatTwitterTimestamp(favEvent.created_at)}</small></p>
             <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
         `;

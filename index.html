@@ -70,11 +70,39 @@
 
     <div id="live-events" class="tabcontent">
         <div class="tabcontent-centered">
-            <h2>Live X Events</h2>
-            <p>Real-time events from your subscribed webhooks will appear here.</p>
-            <div id="live-events-container" class="event-cards-container">
-                <!-- Live event cards will be appended here -->
+            <h2>Live Twitter Events</h2>
+            
+            <div class="live-events-layout-container"> 
+                <div id="live-events-container" class="event-cards-container">
+                    <p><i>Attempting to connect to live event stream...</i></p>
+                    <!-- Live event cards will be appended here -->
+                </div>
+
+                <div id="live-events-instructions-panel" class="instructions-panel">
+                    <h4>Live Events Setup Instructions</h4>
+                    <p>To receive live events in this dashboard, you need to register a webhook with X that points to this application.</p>
+                    
+                    <h5>1. Expose Your Local Server</h5>
+                    <p>Since this app is running locally (e.g., on <code>http://localhost:3000</code>), you'll need a tool to expose it to the internet. We recommend <a href="https://ngrok.com/" target="_blank">ngrok</a>.</p>
+                    <p>Install ngrok, then run the following command in your terminal:</p>
+                    <pre class="code-block-value">ngrok http http://localhost:3000</pre>
+                    <p>Ngrok will give you a public forwarding URL (e.g., <code>https://xxxx-xx-xxx-xx-xx.ngrok-free.app</code>). Copy this HTTPS URL.</p>
+
+                    <h5>2. Construct Your Webhook URL</h5>
+                    <p>Your full webhook URL for Twitter will be the ngrok HTTPS URL followed by <code>/webhooks/twitter</code>.</p>
+                    <p>Example: <code>https://your-ngrok-url.ngrok-free.app/webhooks/twitter</code></p>
+
+                    <h5>3. Add the Webhook in this Dashboard</h5>
+                    <p>Go to the "Webhooks" tab in this dashboard and add the full webhook URL you constructed above.</p>
+                    
+                    <h5>4. Subscribe to Events</h5>
+                    <p>Once the webhook is added and validated (Twitter will perform a CRC check against <code>/webhooks/twitter</code>), go to the "Subscriptions" tab to subscribe the desired user to this webhook.</p>
+
+                    <h5>5. View Live Events</h5>
+                    <p>Return to this "Live Events" tab. Any subscribed events for the user should appear here in real-time.</p>
+                </div>
             </div>
+
         </div>
     </div>
 

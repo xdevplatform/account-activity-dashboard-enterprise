@@ -394,4 +394,79 @@ body { font-family: sans-serif; margin: 0; }
 
 .event-card-unmute {
     border-left: 5px solid #7857f3; /* A distinct purple for unmutes */
+}
+
+/* Layout for Live Events Tab (Cards + Instructions) */
+.live-events-layout-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%; /* Occupy full width of its parent (.tabcontent-centered) */
+    gap: 20px; /* Space between event cards area and instructions panel */
+    margin-top: 15px;
+}
+
+/* Adjust event-cards-container if it's now part of the flex layout */
+#live-events-container.event-cards-container {
+    flex-grow: 3; /* Takes up ~75% of the space if instructions panel is flex-grow: 1 */
+    flex-basis: 0; /* Allows flex-grow to distribute space properly */
+    max-width: none; /* Let flexbox handle it */
+    width: auto; /* Let flexbox handle it */
+    border-right: 1px solid #ccd6dd; /* Subtle dividing line */
+    padding-right: 10em; /* Add some padding so content isn't flush with the line */
+    padding-left: 10em; /* Added left padding */
+}
+
+.instructions-panel {
+    flex-grow: 1; /* Takes up ~25% of the space */
+    flex-basis: 0; /* Allows flex-grow to distribute space properly */
+    background-color: #f5f8fa; /* Light background */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e8ed;
+    text-align: left;
+    height: fit-content; /* Adjust height to content, or set a fixed one with overflow */
+    overflow-y: auto; /* If content is too long */
+    max-height: 70vh; /* Example max height, adjust as needed */
+}
+
+.instructions-panel h4 {
+    margin-top: 0;
+    color: #14171a;
+}
+
+.instructions-panel h5 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #14171a;
+}
+
+.instructions-panel p {
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #5b7083;
+    margin-bottom: 10px;
+}
+
+.instructions-panel code {
+    background-color: #e1e8ed;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 0.9em;
+}
+
+.instructions-panel pre.code-block-value {
+    white-space: pre-wrap; /* Ensure ngrok command wraps */
+    word-break: break-all;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.instructions-panel a {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.instructions-panel a:hover {
+    text-decoration: underline;
 } 
