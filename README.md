@@ -1,70 +1,62 @@
-# Account Activity Dashboard (Bun Version)
+# Account Activity Dashboard (AAA Dashboard)
 
-A web application to help manage Twitter Account Activity API webhooks. This version is built using [Bun](https://bun.sh/).
+## Overview
 
-## Features (Current)
+The Account Activity Dashboard (AAA Dashboard) is a single-page web application designed to manage X (formerly Twitter) account activity. It allows users to register and manage webhooks, subscribe users to these webhooks for activity events, and view a live stream of these events.
 
-*   **Webhook Management (via UI):**
-    *   List registered webhooks for your Twitter application.
-    *   Add new webhook URLs.
-    *   Delete existing webhooks.
-    *   Initiate a Challenge-Response Check (CRC) to validate a webhook.
-*   **Navigation:**
-    *   Tabbed interface for "Webhooks", "Subscriptions" (placeholder), and "Live Events" (placeholder).
-    *   Logo and title in the navigation bar.
-*   **Backend:**
-    *   Serves the frontend `index.html`.
-    *   Provides API endpoints (`/api/webhooks`) to interact with the Twitter API for webhook management, using a Bearer Token for authentication.
-    *   Logs requests and responses to the console.
+The application features a frontend built with HTML, CSS, and vanilla JavaScript, and a backend powered by Bun.js using TypeScript.
 
-## Technologies Used
+## Features
 
-*   **Runtime & Bundler:** [Bun](https://bun.sh/)
-*   **Frontend:** HTML, CSS, vanilla JavaScript
-*   **API Interaction:** `fetch` API (both frontend and backend)
+### 1. Webhooks Management
+Administrate the webhook URLs registered with your X Developer App.
+- **List Webhooks:** View all currently registered webhooks for your X application, including their ID, URL, creation date, and validity status.
+- **Add Webhook:** Register a new webhook URL with X. The dashboard requires the full URL that X will send events to.
+- **Delete Webhook:** Remove an existing webhook registration from X.
+- **Validate Webhook (CRC Check):** Manually trigger a CRC (Challenge-Response Check) request from X to your webhook URL to confirm its validity.
 
-## Setup
+### 2. Subscriptions Management (Per Webhook)
+Manage user subscriptions for each registered webhook. This determines whose account activity will generate events.
+- **Webhook Selection:** Choose an active webhook from a dropdown list to manage its specific subscriptions.
+- **List Subscriptions:** For the selected webhook, view a list of all users currently subscribed. Each user is displayed with their avatar, X handle (username), and User ID. Avatars link to the user's X profile.
+- **Add Subscription:** Subscribe the user (whose credentials are in the `.env` file, specifically `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` which represent the user to be subscribed) to the selected webhook to start receiving their account activity events.
+- **Delete Subscription:** Unsubscribe a specific user from the selected webhook, stopping event delivery for their activity.
 
-1.  **Clone the Repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd <repository-directory>
-    ```
+### 3. Live Events Viewer
+View a real-time stream of account activity events for subscribed users.
+- **Real-time Updates:** Uses WebSockets to receive and display events as they happen.
+- **Event Cards:** Each event is displayed as a card with relevant details. Supported event types include:
+    - **New Posts:** Shows when a subscribed user creates a new post (content, user info, timestamp).
+    - **Deleted Posts:** Shows when a post from a subscribed user is deleted (post ID, user ID, timestamp).
+    - **Favorited Posts:** Shows when a subscribed user favorites a post (favoriting user, details of the favorited post).
+    - **Follows/Unfollows:** Shows when a subscribed user follows or unfollows another user (actor, target, timestamp).
+    - **Mutes/Unmutes:** Shows when a subscribed user mutes or unmutes another user (actor, target, timestamp).
+    - System messages for connection status and unrecognized event types are also displayed.
+- **Instructions Panel:** A dedicated panel on the right side of the Live Events tab provides clear instructions on how to:
+    - Expose the local application to the internet using `ngrok`.
+    - Construct the correct webhook URL for use with X.
+    - Add the webhook and subscribe users within this dashboard.
 
-2.  **Install Dependencies (Bun will handle this when running):**
-    Bun typically installs dependencies automatically when it encounters them in `import` statements or as specified in `package.json` if you start using it more formally. For now, ensuring Bun is installed is key.
+### 4. Backend Functionality
+The Bun.js server handles several key tasks:
+- **Static File Serving:** Serves the `index.html` and static assets (CSS, JS) from the `/public` directory.
+- **API Proxy:** Provides backend API endpoints that proxy requests to the X API v2 (e.g., for fetching webhooks, users, managing subscriptions). This keeps X API credentials secure on the server.
+- **Webhook Event Handling:**
+    - **CRC Checks (GET `/webhooks/twitter`):** Responds to X's CRC validation requests using the `X_CONSUMER_SECRET`.
+    - **Event Receiving (POST `/webhooks/twitter`):** Receives incoming event payloads from X.
+- **Authentication:**
+    - Uses **OAuth 1.0a** (with consumer keys and user access tokens from `.env`) for actions like creating subscriptions.
+    - Uses **Bearer Token** (from `.env`) for read-only actions like fetching webhooks or user details.
+- **WebSocket Server:** Establishes a WebSocket connection with the frontend (`/ws/live-events`) to broadcast incoming X events in real-time to the Live Events tab.
 
-3.  **Configure Environment Variables:**
-    *   Copy the `env.template` file to a new file named `.env` in the root of the project:
-        ```bash
-        cp env.template .env
-        ```
-    *   Edit the `.env` file and add your Twitter App's Bearer Token:
-        ```
-        X_CONSUMER_KEY=
-        X_CONSUMER_SECRET=
-        X_ACCESS_TOKEN=
-        X_ACCESS_TOKEN_SECRET=
-        X_BEARER_TOKEN=YOUR_TWITTER_APP_BEARER_TOKEN_HERE # Replace this
-        ```
-        The Bearer Token is used for authenticating with the Twitter API v2 webhook endpoints.
+## Tech Stack
 
-## Running the Application
-
-1.  **Start the Server:**
-    ```bash
-    bun run index.ts
-    ```
-    This will start the Bun server, typically on port 3000. The console will confirm the listening address (e.g., `Listening on http://localhost:3000 ...`).
-
-    For development with automatic reloading when `index.ts` changes:
-    ```bash
-    bun run --watch index.ts
-    ```
-    *(Note: Hot reloading for `index.html` changes directly served by `Bun.file()` might require a browser refresh or further server configuration if not automatically handled by Bun's development server for static files.)*
-
-2.  **Access in Browser:**
-    Open your web browser and navigate to `http://localhost:3000` (or the port indicated in the console).
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **Backend:** [Bun.js](https://bun.sh/) (using TypeScript)
+- **X API Version:** v2
+- **Key Libraries:**
+    - `oauth-1.0a` (for backend X API authentication)
+- **Development Tooling:** `ngrok` (recommended for exposing local server)
 
 ## Project Structure
 
@@ -81,21 +73,80 @@ A web application to help manage Twitter Account Activity API webhooks. This ver
 └── README.md           # This file
 ```
 
-## How it Works
+## Setup and Running the Application
 
-*   The `index.ts` file uses Bun's built-in `serve` function to create an HTTP server.
-*   It serves the `index.html` file for the root path (`/`).
-*   It provides API endpoints under `/api/webhooks` that the frontend calls:
-    *   `GET /api/webhooks`: Fetches the list of registered webhooks.
-    *   `POST /api/webhooks`: Creates a new webhook.
-    *   `DELETE /api/webhooks/:id`: Deletes a specified webhook.
-    *   `PUT /api/webhooks/:id`: Initiates a CRC validation for a specified webhook.
-*   These backend endpoints securely use the `X_BEARER_TOKEN` from the `.env` file to make authenticated requests to the Twitter API (`https://api.twitter.com/2/webhooks`).
-*   The frontend `index.html` uses JavaScript to:
-    *   Manage tab navigation.
-    *   Fetch data from the backend API endpoints.
-    *   Dynamically render the list of webhooks.
-    *   Handle user interactions for adding, deleting, and validating webhooks, including confirmation dialogs and feedback messages.
+### Prerequisites
+1.  **Bun:** Ensure you have Bun installed. Visit [bun.sh](https://bun.sh/) for installation instructions.
+2.  **X Developer Account & App:**
+    *   You need an X Developer Account.
+    *   Create an App within your X Developer Portal to obtain API keys and tokens.
+    *   Ensure your App has the necessary permissions for the Account Activity API (or the relevant v2 endpoints for webhooks and user activity). You will need Consumer Keys, and an Access Token & Secret for the user account whose activity you wish to monitor and manage subscriptions for. A Bearer Token is also needed for some v2 endpoints.
+
+### Environment Variables
+1.  **Create `.env` file:**
+    Copy the `env.template` file to a new file named `.env` in the project root.
+    ```bash
+    cp env.template .env
+    ```
+2.  **Populate `.env`:**
+    Open the `.env` file and fill in your X Developer App credentials:
+    ```
+    X_CONSUMER_KEY="YOUR_APP_CONSUMER_KEY"
+    X_CONSUMER_SECRET="YOUR_APP_CONSUMER_SECRET"
+    X_ACCESS_TOKEN="USER_ACCESS_TOKEN_FOR_SUBSCRIPTIONS"
+    X_ACCESS_TOKEN_SECRET="USER_ACCESS_TOKEN_SECRET_FOR_SUBSCRIPTIONS"
+    X_BEARER_TOKEN="YOUR_APP_BEARER_TOKEN"
+    # Optional: PORT=3001 (defaults to 3000 if not set)
+    ```
+    - `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` should belong to the X user account for which you want to manage webhook subscriptions (i.e., whose activities the webhook will monitor).
+
+### Installation
+Install project dependencies (primarily `oauth-1.0a` and any type definitions Bun pulls in automatically):
+```bash
+bun install
+```
+
+### Running the Application
+1.  **Start the server:**
+    ```bash
+    bun run index.ts
+    ```
+    (If you have `nodemon` or similar tools configured for Bun, you might use `bun dev` or an equivalent command.)
+2.  **Access the Dashboard:**
+    Open your browser and navigate to `http://localhost:3000` (or the port you specified in `.env`).
+
+### Setting Up Webhooks for Live Events
+To receive live events from X in the dashboard:
+1.  **Expose your local server:**
+    Since the application runs locally, X needs a public URL to send events. Use a tool like `ngrok`.
+    - If you don't have ngrok, download and install it from [ngrok.com](https://ngrok.com/).
+    - Run ngrok to forward to your local Bun server's port (default 3000):
+      ```bash
+      ngrok http http://localhost:3000
+      ```
+    - ngrok will provide a public HTTPS forwarding URL (e.g., `https://your-unique-id.ngrok-free.app`). **Copy this HTTPS URL.**
+
+2.  **Construct your full Webhook URL:**
+    Append `/webhooks/twitter` to your ngrok HTTPS URL.
+    *Example:* `https://your-unique-id.ngrok-free.app/webhooks/twitter`
+
+3.  **Add the Webhook in the Dashboard:**
+    - Navigate to the "Webhooks" tab in the AAA Dashboard.
+    - Enter the full ngrok-based webhook URL you constructed into the "Add New Webhook" form and submit.
+    - X will send a CRC request to this URL. The backend is set up to handle this. You should see the webhook appear in the list, and ideally, it becomes valid.
+
+4.  **Subscribe a User:**
+    - Go to the "Subscriptions" tab.
+    - Select your newly added (and validated) webhook from the dropdown.
+    - Click the "Add Subscription (for user in .env)" button. This will attempt to subscribe the X user (associated with the `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET` in your `.env` file) to activity events.
+
+5.  **View Live Events:**
+    - Navigate to the "Live Events" tab.
+    - If the WebSocket connection is successful, any configured activity from the subscribed user should now appear here in real-time.
+
+---
+
+This README should provide a good overview for anyone looking to understand or run the Account Activity Dashboard.
 
 ## Future Enhancements (Potential)
 
