@@ -1,4 +1,4 @@
-# Account Activity Dashboard (AAA Dashboard)
+# Account Activity API Dashboard (AAA Dashboard)
 
 A Bun.js web application to monitor and manage X (formerly Twitter) Account Activity API webhooks, subscriptions, and live events.
 
