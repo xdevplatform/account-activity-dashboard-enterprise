@@ -32,7 +32,7 @@ Follow these steps to get the application running locally:
 
 ```bash
 # Replace with your repository's clone command if applicable
-git clone https://your-repository-url.git
+git clone https://github.com/xdevplatform/account-activity-dashboard-enterprise.git
 cd account-activity-dashboard-enterprise
 ```
 
