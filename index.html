@@ -25,6 +25,9 @@
         <div class="tabcontent-centered">
             <h2>Webhooks</h2>
             <p>Manage your registered webhook URLs.</p>
+            <div class="webhooks-actions">
+                <button id="refresh-webhooks-btn">Refresh List</button>
+            </div>
             <div id="webhooks-loading" style="display: none;">Loading webhooks...</div>
             <ul id="webhooks-list"></ul>
             <div id="webhooks-error" style="display: none; color: red;"></div>
@@ -50,6 +53,7 @@
                     <option value="">Loading webhooks...</option>
                 </select>
                 <div id="webhook-select-error" style="color: red; margin-top: 5px; text-align: left;"></div>
+                <button id="refresh-subscriptions-btn" style="margin-top: 10px;">Refresh Subscriptions</button>
             </div>
 
             <div id="subscriptions-list-container">

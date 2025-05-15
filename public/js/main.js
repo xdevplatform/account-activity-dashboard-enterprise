@@ -1,4 +1,6 @@
 let currentOpenTab = 'webhooks'; // Default tab
+let lastSelectedWebhookIdForSubscriptions = null; // Store the last selected webhook ID
+let cachedWebhooksData = null; // For client-side caching of webhooks
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[MainJS_Debug] DOMContentLoaded event fired.");
@@ -20,6 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Event listener for the new Refresh Webhooks button
+    const refreshWebhooksBtn = document.getElementById('refresh-webhooks-btn');
+    if (refreshWebhooksBtn) {
+        refreshWebhooksBtn.addEventListener('click', () => {
+            console.log("[MainJS_Debug] Refresh Webhooks button clicked.");
+            fetchWebhooks(true); // Force a refresh
+        });
+    }
+
+    // Event listener for the new Refresh Subscriptions button
+    const refreshSubscriptionsBtn = document.getElementById('refresh-subscriptions-btn');
+    if (refreshSubscriptionsBtn) {
+        refreshSubscriptionsBtn.addEventListener('click', () => {
+            console.log("[MainJS_Debug] Refresh Subscriptions button clicked.");
+            if (lastSelectedWebhookIdForSubscriptions && typeof window.fetchAndDisplaySubscriptions === 'function') {
+                window.fetchAndDisplaySubscriptions(lastSelectedWebhookIdForSubscriptions, true);
+            } else {
+                console.warn("[MainJS_Debug] No webhook selected or fetchAndDisplaySubscriptions not available for refresh.");
+            }
+        });
+    }
 
     // Handle initial tab based on hash or default
     console.log("[MainJS_Debug] About to call handleHashChange for initial load.");
@@ -97,51 +121,80 @@ function showTab(tabId) {
     }
 }
 
-async function fetchWebhooks() {
+function renderWebhooksList(webhooksArray) {
+    const listElement = document.getElementById('webhooks-list');
+    const errorElement = document.getElementById('webhooks-error');
+    if (!listElement || !errorElement) {
+        console.error("[MainJS] Webhooks list or error element not found for rendering.");
+        return;
+    }
+
+    listElement.innerHTML = ''; // Clear previous list
+    errorElement.style.display = 'none';
+    errorElement.textContent = '';
+
+    if (webhooksArray && webhooksArray.length > 0) {
+        webhooksArray.forEach(webhook => {
+            const listItem = document.createElement('li');
+            const createdAt = new Date(webhook.created_at).toUTCString().replace('GMT', 'UTC');
+            const isValid = webhook.valid ? 'Yes' : 'No';
+            listItem.innerHTML = `
+                <button class="delete-webhook-btn" onclick="confirmDeleteWebhook('${webhook.id}', '${webhook.url}')">Delete</button>
+                <button class="validate-webhook-btn" onclick="handleValidateWebhook(this, '${webhook.id}')">Validate</button>
+                <p><strong>ID:</strong> <span class="code-block-value">${webhook.id}</span></p>
+                <p><strong>URL:</strong> <span class="code-block-value"><a href="${webhook.url}" target="_blank">${webhook.url}</a></span></p>
+                <p><strong>Created At:</strong> <span class="code-block-value">${createdAt}</span></p>
+                <p><strong>Valid:</strong> <span class="code-block-value">${isValid}</span></p>
+            `;
+            listElement.appendChild(listItem);
+        });
+    } else if (webhooksArray) { // webhooksArray exists but is empty
+        listElement.innerHTML = '<li>No webhooks registered.</li>';
+    } else { // webhooksArray is null or undefined (should ideally not happen if called correctly)
+         listElement.innerHTML = '<li>Could not load webhook data.</li>';
+    }
+}
+
+async function fetchWebhooks(forceRefresh = false) {
     const listElement = document.getElementById('webhooks-list');
     const loadingElement = document.getElementById('webhooks-loading');
     const errorElement = document.getElementById('webhooks-error');
 
     if (!listElement || !loadingElement || !errorElement) return;
 
-    listElement.innerHTML = '';
+    console.log(`[MainJS_Debug] fetchWebhooks called. Force refresh: ${forceRefresh}`);
+
+    if (!forceRefresh && cachedWebhooksData !== null) {
+        console.log("[MainJS_Debug] Using cached webhooks data.");
+        loadingElement.style.display = 'none'; // Ensure loading is hidden
+        renderWebhooksList(cachedWebhooksData);
+        return;
+    }
+
+    listElement.innerHTML = ''; // Clear before loading if fetching fresh
     errorElement.style.display = 'none';
     errorElement.textContent = '';
     loadingElement.style.display = 'block';
 
     try {
+        console.log("[MainJS_Debug] Fetching webhooks from API.");
         const response = await fetch('/api/webhooks');
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
             throw new Error(`Error ${response.status}: ${errorData.error || errorData.details?.title || errorData.details?.detail || errorData.message || 'Failed to fetch webhooks'}`);
         }
         const result = await response.json();
+        
+        cachedWebhooksData = result.data || []; // Cache the data (or empty array if no data field)
+        console.log("[MainJS_Debug] Webhooks fetched and cached:", cachedWebhooksData);
+        renderWebhooksList(cachedWebhooksData);
 
-        if (result.data && result.data.length > 0) {
-            result.data.forEach(webhook => {
-                const listItem = document.createElement('li');
-                const createdAt = new Date(webhook.created_at).toUTCString().replace('GMT', 'UTC');
-                const isValid = webhook.valid ? 'Yes' : 'No';
-                listItem.innerHTML = `
-                    <button class="delete-webhook-btn" onclick="confirmDeleteWebhook('${webhook.id}', '${webhook.url}')">Delete</button>
-                    <button class="validate-webhook-btn" onclick="handleValidateWebhook(this, '${webhook.id}')">Validate</button>
-                    <p><strong>ID:</strong> <span class="code-block-value">${webhook.id}</span></p>
-                    <p><strong>URL:</strong> <span class="code-block-value"><a href="${webhook.url}" target="_blank">${webhook.url}</a></span></p>
-                    <p><strong>Created At:</strong> <span class="code-block-value">${createdAt}</span></p>
-                    <p><strong>Valid:</strong> <span class="code-block-value">${isValid}</span></p>
-                `;
-                listElement.appendChild(listItem);
-            });
-        } else if (result.meta && result.meta.result_count === 0) {
-            listElement.innerHTML = '<li>No webhooks registered.</li>';
-        } else {
-             listElement.innerHTML = '<li>Could not parse webhook data or no webhooks found.</li>';
-        }
     } catch (err) {
         console.error("Failed to fetch or display webhooks:", err);
         errorElement.textContent = err.message || 'An unexpected error occurred.';
         errorElement.style.display = 'block';
         listElement.innerHTML = '<li>Error loading webhooks.</li>';
+        cachedWebhooksData = null; // Invalidate cache on error
     } finally {
         loadingElement.style.display = 'none';
     }
@@ -182,7 +235,7 @@ async function handleAddWebhook() {
             messageElement.textContent = `Webhook created successfully! ID: ${responseData.data?.id || 'N/A'}`;
             messageElement.style.color = 'green';
             urlInput.value = '';
-            fetchWebhooks();
+            fetchWebhooks(true);
         } else {
             let detailedErrorMessage = 'Failed to create webhook.';
             const twitterError = responseData;
@@ -225,7 +278,7 @@ async function confirmDeleteWebhook(webhookId, webhookUrl) {
         });
         if (response.ok) {
             alert('Webhook deleted successfully!');
-            fetchWebhooks();
+            fetchWebhooks(true);
         } else {
             const errorData = await response.json().catch(() => ({ message: 'Failed to parse server error response for delete operation' }));
             let finalDetailMessage = 'Failed to delete webhook.';
@@ -264,6 +317,7 @@ async function handleValidateWebhook(buttonElement, webhookId) {
         });
         if (response.status === 204) {
             alert(`Validation request sent successfully for webhook ID: ${webhookId}.\nCheck your server logs for CRC activity and refresh the list to see updated status eventually.`);
+            fetchWebhooks(true);
         } else if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Failed to parse server error response for validation' }));
             let finalDetailMessage = 'Failed to send validation request.';
@@ -351,6 +405,8 @@ function handleSubscriptionWebhookChange(event) {
     if (!selectElement || !subscriptionsListContainer) return;
 
     const selectedWebhookId = selectElement.value; 
+    lastSelectedWebhookIdForSubscriptions = selectedWebhookId; // Store the selection
+    
     subscriptionsListContainer.innerHTML = ''; 
 
     if (selectedWebhookId) {
@@ -367,10 +423,35 @@ function handleSubscriptionWebhookChange(event) {
     }
 }
 
-function initializeSubscriptionsPage() {
-    populateWebhookDropdownForSubscriptions();
+async function initializeSubscriptionsPage() {
+    console.log("[MainJS_Debug] Initializing Subscriptions Page.");
     const selectElement = document.getElementById('webhook-select-for-subscriptions');
-    if (selectElement) {
+    
+    // Ensure the change event listener for the dropdown is set up only once
+    if (selectElement && !selectElement.hasAttribute('data-listener-set')) {
         selectElement.addEventListener('change', handleSubscriptionWebhookChange);
+        selectElement.setAttribute('data-listener-set', 'true');
     }
+    
+    // The refresh button listener is now added in DOMContentLoaded to ensure it's also only added once.
+
+    await populateWebhookDropdownForSubscriptions(); 
+
+    // Attempt to restore the last selected webhook
+    if (lastSelectedWebhookIdForSubscriptions) {
+        const optionExists = selectElement.querySelector(`option[value="${lastSelectedWebhookIdForSubscriptions}"]`);
+        if (optionExists) {
+            console.log(`[MainJS_Debug] Restoring last selected webhook for subscriptions: ${lastSelectedWebhookIdForSubscriptions}`);
+            selectElement.value = lastSelectedWebhookIdForSubscriptions;
+        } else {
+            console.log(`[MainJS_Debug] Last selected webhook ${lastSelectedWebhookIdForSubscriptions} not found in dropdown, resetting.`);
+            lastSelectedWebhookIdForSubscriptions = null; // Clear if not found
+            selectElement.value = ""; // Reset to default/placeholder
+        }
+    } else {
+        selectElement.value = ""; // Ensure it's on the placeholder if no prior selection
+    }
+    
+    // Trigger change handler to load subscriptions for the (potentially restored) selection or clear list
+    handleSubscriptionWebhookChange(); 
 } 
