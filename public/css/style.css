@@ -396,6 +396,11 @@ body { font-family: sans-serif; margin: 0; }
     border-left: 5px solid #7857f3; /* A distinct purple for unmutes */
 }
 
+.event-card-replay-status {
+    border-left: 5px solid #6c757d; /* Bootstrap secondary/gray color for general status */
+    background-color: #f8f9fa; /* Light gray background */
+}
+
 /* Layout for Live Events Tab (Cards + Instructions) */
 .live-events-layout-container {
     display: flex;
@@ -469,4 +474,122 @@ body { font-family: sans-serif; margin: 0; }
 
 .instructions-panel a:hover {
     text-decoration: underline;
+} 
+
+/* General Modal Styles (can be reused or specified if unique ones are needed) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% from the top and centered */
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px; /* Maximum width */
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal p {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.modal .form-group {
+    margin-bottom: 15px;
+}
+
+.modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.modal .form-group input[type="datetime-local"] {
+    width: calc(100% - 16px); /* Account for padding */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.modal-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.modal-button:hover {
+    background-color: #0056b3;
+}
+
+.modal-message {
+    margin-top: 15px;
+    font-size: 0.9em;
+    min-height: 20px; /* Reserve space for messages */
+}
+
+/* Specific class for replay modal content if needed, but generic .modal-content should be fine */
+.replay-modal-content {}
+
+/* Styles for the new Replay button on webhook cards */
+.replay-webhook-btn {
+    background-color: #28a745; /* Green */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.8em;
+    margin: 0 5px 5px 0;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.replay-webhook-btn:hover {
+    background-color: #218838;
 } 

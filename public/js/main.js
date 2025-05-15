@@ -1,6 +1,7 @@
 let currentOpenTab = 'webhooks'; // Default tab
 let lastSelectedWebhookIdForSubscriptions = null; // Store the last selected webhook ID
 let cachedWebhooksData = null; // For client-side caching of webhooks
+let currentReplayWebhookId = null; // Store webhook ID for replay modal
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[MainJS_Debug] DOMContentLoaded event fired.");
@@ -48,6 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle initial tab based on hash or default
     console.log("[MainJS_Debug] About to call handleHashChange for initial load.");
     handleHashChange();
+
+    // Add event listener for closing replay modal on outside click
+    window.addEventListener('click', function(event) {
+        const replayModal = document.getElementById('replay-events-modal');
+        const replayModalContent = document.querySelector('.replay-modal-content');
+        if (replayModal && replayModal.style.display === 'block' && event.target === replayModal) {
+            // Check if the click is directly on the modal backdrop, not the content
+            if (replayModalContent && !replayModalContent.contains(event.target)) {
+                 closeReplayModal();
+            }
+        }
+    });
 });
 
 function handleHashChange() {
@@ -141,6 +154,7 @@ function renderWebhooksList(webhooksArray) {
             listItem.innerHTML = `
                 <button class="delete-webhook-btn" onclick="confirmDeleteWebhook('${webhook.id}', '${webhook.url}')">Delete</button>
                 <button class="validate-webhook-btn" onclick="handleValidateWebhook(this, '${webhook.id}')">Validate</button>
+                <button class="replay-webhook-btn" onclick="showReplayModal('${webhook.id}')">Replay Events</button>
                 <p><strong>ID:</strong> <span class="code-block-value">${webhook.id}</span></p>
                 <p><strong>URL:</strong> <span class="code-block-value"><a href="${webhook.url}" target="_blank">${webhook.url}</a></span></p>
                 <p><strong>Created At:</strong> <span class="code-block-value">${createdAt}</span></p>
@@ -454,4 +468,139 @@ async function initializeSubscriptionsPage() {
     
     // Trigger change handler to load subscriptions for the (potentially restored) selection or clear list
     handleSubscriptionWebhookChange(); 
+}
+
+// --- Replay Events Modal Functions ---
+function showReplayModal(webhookId) {
+    currentReplayWebhookId = webhookId;
+    const modal = document.getElementById('replay-events-modal');
+    const messageElement = document.getElementById('replay-message');
+    const fromDateInput = document.getElementById('replay-from-datetime');
+    const toDateInput = document.getElementById('replay-to-datetime');
+
+    if (messageElement) messageElement.textContent = '';
+    if (fromDateInput) fromDateInput.value = '';
+    if (toDateInput) toDateInput.value = '';
+    
+    if (modal) {
+        modal.style.display = 'block';
+    }
+    console.log(`[MainJS] Show replay modal for webhook ID: ${webhookId}`);
+}
+
+function closeReplayModal() {
+    const modal = document.getElementById('replay-events-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    currentReplayWebhookId = null;
+    console.log('[MainJS] Replay modal closed.');
+}
+
+function formatDateTimeForApi(dateTimeLocalValue) {
+    if (!dateTimeLocalValue) return '';
+    // dateTimeLocalValue is like "YYYY-MM-DDTHH:mm"
+    // We need "YYYYMMDDHHmm"
+    return dateTimeLocalValue.replace(/[-T:]/g, '');
+}
+
+async function handleConfirmReplay() {
+    if (!currentReplayWebhookId) {
+        console.error("[MainJS] No webhook ID available for replay.");
+        alert("Error: No webhook selected for replay.");
+        return;
+    }
+
+    const fromDateInput = document.getElementById('replay-from-datetime');
+    const toDateInput = document.getElementById('replay-to-datetime');
+    const messageElement = document.getElementById('replay-message');
+
+    if (!fromDateInput || !toDateInput || !messageElement) {
+        console.error("[MainJS] Replay modal date/time input or message element not found.");
+        alert("Error: Modal elements not found.");
+        return;
+    }
+
+    const fromDateTime = fromDateInput.value;
+    const toDateTime = toDateInput.value;
+
+    messageElement.textContent = '';
+    messageElement.style.color = 'red';
+
+    if (!fromDateTime || !toDateTime) {
+        messageElement.textContent = 'Please select both start and end date/time.';
+        return;
+    }
+
+    const fromDateApi = formatDateTimeForApi(fromDateTime);
+    const toDateApi = formatDateTimeForApi(toDateTime);
+
+    if (fromDateApi >= toDateApi) {
+        messageElement.textContent = 'Start date/time must be before end date/time.';
+        return;
+    }
+    
+    // Twitter API constraints: from_date and to_date must be within the last 15 days.
+    // And to_date must be at least one minute after from_date.
+    // And from_date must be at least one minute in the past from now.
+    const now = new Date();
+    const fromDateObj = new Date(fromDateTime);
+    const toDateObj = new Date(toDateTime);
+    const fifteenDaysAgo = new Date(now.getTime() - (15 * 24 * 60 * 60 * 1000));
+
+    if (fromDateObj < fifteenDaysAgo || toDateObj < fifteenDaysAgo) {
+        messageElement.textContent = 'Dates must be within the last 15 days.';
+        return;
+    }
+    if (toDateObj.getTime() - fromDateObj.getTime() < 60000) { // Less than 1 minute difference
+        messageElement.textContent = 'End time must be at least one minute after start time.';
+        return;
+    }
+    if (fromDateObj >= now) {
+        messageElement.textContent = 'Start time must be in the past.';
+        return;
+    }
+
+
+    messageElement.textContent = 'Requesting replay...';
+    messageElement.style.color = 'black';
+
+    try {
+        const apiUrl = `/api/webhooks/${currentReplayWebhookId}/replay?from_date=${fromDateApi}&to_date=${toDateApi}`;
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                // No Content-Type needed as there is no body
+            },
+            // No body, parameters are in URL
+        });
+
+        if (response.status === 200) { // OK - Success
+            const resultData = await response.json();
+            messageElement.textContent = `Replay request successful! Job ID: ${resultData?.data?.job_id}. Events should arrive soon.`;
+            messageElement.style.color = 'green';
+            // Optionally close modal after a short delay or keep it open with success message
+            setTimeout(closeReplayModal, 4000);
+        } else {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response for replay' }));
+            let detailedErrorMessage = `Failed to request replay (Status: ${response.status}).`;
+            if (errorData.error) {
+                detailedErrorMessage += ` Server Error: ${errorData.error}`;
+            }
+            if (errorData.details) {
+                 if (typeof errorData.details === 'string') {
+                    detailedErrorMessage += ` Details: ${errorData.details}`;
+                 } else if (errorData.details.title && errorData.details.errors) {
+                    detailedErrorMessage += ` X API Error: ${errorData.details.title} - ${errorData.details.errors.map(e => e.message).join(', ')}`;
+                 } else if (errorData.details.detail) {
+                     detailedErrorMessage += ` X API Detail: ${errorData.details.detail}`;
+                 }
+            }
+            messageElement.textContent = detailedErrorMessage;
+            console.error("Replay request failed:", detailedErrorMessage, errorData);
+        }
+    } catch (err) {
+        console.error("Failed to send replay request:", err);
+        messageElement.textContent = `Failed to send replay request: ${err.message}`;
+    }
 } 

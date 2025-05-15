@@ -1,17 +1,17 @@
 let liveEventsSocket = null;
 const MAX_EVENTS_DISPLAYED = 50; // Keep a manageable number of events on screen
 
-function formatTwitterTimestamp(twitterTimestamp) {
-    // Parses Twitter's timestamp string and formats it
+function formatXTimestamp(timestamp) {
+    // Parses X's timestamp string and formats it
     // Example: "Thu May 15 12:35:18 +0000 2025"
     try {
-        const date = new Date(twitterTimestamp);
+        const date = new Date(timestamp);
         if (isNaN(date.getTime())) {
-            return twitterTimestamp; // Return original if parsing fails
+            return timestamp; // Return original if parsing fails
         }
         return date.toLocaleString(); // User's local time
     } catch (e) {
-        return twitterTimestamp; // Fallback
+        return timestamp; // Fallback
     }
 }
 
@@ -35,7 +35,7 @@ function createEventCard(eventData) {
             <p><strong>Post:</strong> ${tweetEvent.text}</p>
             <p><small>Post ID: ${tweetEvent.id_str}</small></p>
             <p><small>User ID: ${user.id_str}</small></p>
-            <p><small>Posted At: ${formatTwitterTimestamp(tweetEvent.created_at)}</small></p>
+            <p><small>Posted At: ${formatXTimestamp(tweetEvent.created_at)}</small></p>
             <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
         `;
         card.classList.add('event-card-tweet-create');
@@ -57,7 +57,7 @@ function createEventCard(eventData) {
             <p><strong>User:</strong> ${favEvent.user.name} (@${favEvent.user.screen_name}) favorited a post.</p>
             <p><strong>Favorited Post ID:</strong> ${favEvent.favorited_status.id_str}</p>
             <p><strong>Favorited Post User:</strong> @${favEvent.favorited_status.user.screen_name}</p>
-            <p><small>Event At: ${formatTwitterTimestamp(favEvent.created_at)}</small></p>
+            <p><small>Event At: ${formatXTimestamp(favEvent.created_at)}</small></p>
             <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
         `;
         card.classList.add('event-card-favorite');
@@ -85,6 +85,17 @@ function createEventCard(eventData) {
             <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
         `;
         card.classList.add(muteEvent.type === 'mute' ? 'event-card-mute' : 'event-card-unmute');
+    } else if (eventData.replay_job_status) {
+        const statusEvent = eventData.replay_job_status;
+        content = `
+            <h4>Replay Job Status</h4>
+            <p><strong>Webhook ID:</strong> ${statusEvent.webhook_id}</p>
+            <p><strong>Job ID:</strong> ${statusEvent.job_id}</p>
+            <p><strong>State:</strong> ${statusEvent.job_state}</p>
+            <p><strong>Description:</strong> ${statusEvent.job_state_description || 'N/A'}</p>
+            <p><small>Received: ${new Date().toLocaleTimeString()}</small></p>
+        `;
+        card.classList.add('event-card-replay-status');
     }
     // Add more else if blocks for other event types like block, direct_message_events etc.
     

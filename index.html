@@ -74,7 +74,7 @@
 
     <div id="live-events" class="tabcontent">
         <div class="tabcontent-centered">
-            <h2>Live Twitter Events</h2>
+            <h2>Live X Events</h2>
             
             <div class="live-events-layout-container"> 
                 <div id="live-events-container" class="event-cards-container">
@@ -93,20 +93,39 @@
                     <p>Ngrok will give you a public forwarding URL (e.g., <code>https://xxxx-xx-xxx-xx-xx.ngrok-free.app</code>). Copy this HTTPS URL.</p>
 
                     <h5>2. Construct Your Webhook URL</h5>
-                    <p>Your full webhook URL for Twitter will be the ngrok HTTPS URL followed by <code>/webhooks/twitter</code>.</p>
+                    <p>Your full webhook URL for X will be the ngrok HTTPS URL followed by <code>/webhooks/twitter</code>.</p>
                     <p>Example: <code>https://your-ngrok-url.ngrok-free.app/webhooks/twitter</code></p>
 
                     <h5>3. Add the Webhook in this Dashboard</h5>
                     <p>Go to the "Webhooks" tab in this dashboard and add the full webhook URL you constructed above.</p>
                     
                     <h5>4. Subscribe to Events</h5>
-                    <p>Once the webhook is added and validated (Twitter will perform a CRC check against <code>/webhooks/twitter</code>), go to the "Subscriptions" tab to subscribe the desired user to this webhook.</p>
+                    <p>Once the webhook is added and validated (X will perform a CRC check against <code>/webhooks/twitter</code>), go to the "Subscriptions" tab to subscribe the desired user to this webhook.</p>
 
                     <h5>5. View Live Events</h5>
                     <p>Return to this "Live Events" tab. Any subscribed events for the user should appear here in real-time.</p>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Replay Events Modal -->
+    <div id="replay-events-modal" class="modal">
+        <div class="modal-content replay-modal-content">
+            <span class="close-button" onclick="closeReplayModal()">&times;</span>
+            <h3>Replay Events for Webhook</h3>
+            <p>Select the time frame (in your local time) to replay events. Dates must be within the last 15 days.</p>
+            <div class="form-group">
+                <label for="replay-from-datetime">From (Local Time):</label>
+                <input type="datetime-local" id="replay-from-datetime" name="replay-from-datetime">
+            </div>
+            <div class="form-group">
+                <label for="replay-to-datetime">To (Local Time):</label>
+                <input type="datetime-local" id="replay-to-datetime" name="replay-to-datetime">
+            </div>
+            <button id="confirm-replay-btn" onclick="handleConfirmReplay()" class="modal-button">Confirm Replay</button>
+            <div id="replay-message" class="modal-message"></div>
         </div>
     </div>
 

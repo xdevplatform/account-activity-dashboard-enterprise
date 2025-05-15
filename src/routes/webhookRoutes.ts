@@ -14,10 +14,28 @@ function jsonResponse(status: number, body: any, method: string, pathname: strin
     });
 }
 
-// Helper for 204 No Content response with logging
-function noContentResponse(method: string, pathname: string): Response {
-    console.log(`[RESPONSE] ${method} ${pathname} - Status: 204 (No Content)`);
-    return new Response(null, { status: 204 });
+// Helper for responses with no content (e.g., 204 No Content, 202 Accepted)
+function noContentResponse(method: string, pathname: string, status: number = 204): Response {
+    console.log(`[RESPONSE] ${method} ${pathname} - Status: ${status}, Body: (empty)`);
+    return new Response(null, { status });
+}
+
+function convertLocalYYYYMMDDHHmmToUTC(localDateTimeStr: string): string {
+    const year = parseInt(localDateTimeStr.substring(0, 4), 10);
+    const month = parseInt(localDateTimeStr.substring(4, 6), 10) - 1; // Month is 0-indexed in JS Date
+    const day = parseInt(localDateTimeStr.substring(6, 8), 10);
+    const hour = parseInt(localDateTimeStr.substring(8, 10), 10);
+    const minute = parseInt(localDateTimeStr.substring(10, 12), 10);
+
+    const localDate = new Date(year, month, day, hour, minute);
+
+    const utcYear = localDate.getUTCFullYear();
+    const utcMonth = (localDate.getUTCMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed, add 1 back
+    const utcDay = localDate.getUTCDate().toString().padStart(2, '0');
+    const utcHour = localDate.getUTCHours().toString().padStart(2, '0');
+    const utcMinute = localDate.getUTCMinutes().toString().padStart(2, '0');
+
+    return `${utcYear}${utcMonth}${utcDay}${utcHour}${utcMinute}`;
 }
 
 async function getWebhooks(req: Request, url: URL): Promise<Response> {
@@ -154,6 +172,76 @@ async function deleteWebhook(req: Request, url: URL, webhookId: string): Promise
     }
 }
 
+async function replayWebhookEvents(req: Request, url: URL, webhookId: string): Promise<Response> {
+    const bearerToken = process.env.X_BEARER_TOKEN;
+    if (!bearerToken) {
+        console.error(`X_BEARER_TOKEN not found for POST /api/webhooks/${webhookId}/replay.`);
+        return jsonResponse(500, { error: "Server configuration error: Missing API token." }, req.method, url.pathname);
+    }
+
+    try {
+        const from_date = url.searchParams.get('from_date');
+        const to_date = url.searchParams.get('to_date');
+
+        if (!from_date || typeof from_date !== 'string' || !to_date || typeof to_date !== 'string') {
+            return jsonResponse(400, { error: "Invalid query parameters: 'from_date' and 'to_date' are required strings in YYYYMMDDHHmm format representing local time." }, req.method, url.pathname);
+        }
+        
+        // Basic validation for YYYYMMDDHHmm format (length 12, all digits)
+        if (from_date.length !== 12 || !/^[0-9]+$/.test(from_date) || to_date.length !== 12 || !/^[0-9]+$/.test(to_date)) {
+            return jsonResponse(400, { error: "Invalid date format in query parameters: 'from_date' and 'to_date' must be in YYYYMMDDHHmm format representing local time." }, req.method, url.pathname);
+        }
+
+        const from_date_utc = convertLocalYYYYMMDDHHmmToUTC(from_date);
+        const to_date_utc = convertLocalYYYYMMDDHHmmToUTC(to_date);
+
+        const twitterApiUrl = `https://api.twitter.com/2/account_activity/replay/webhooks/${webhookId}/subscriptions/all?from_date=${from_date_utc}&to_date=${to_date_utc}`;
+        console.log(`[DEBUG] Sending POST to X API for replay: ${twitterApiUrl} (UTC times) from local inputs: from=${from_date}, to=${to_date}`);
+
+        const response = await fetch(twitterApiUrl, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${bearerToken}`,
+                // Content-Type is not needed for POST with query parameters and no body
+            },
+            // No body for this request as parameters are in URL
+        });
+
+        interface XReplaySuccessResponse {
+            data: {
+                job_id: string;
+                created_at: string;
+            };
+        }
+
+        if (response.status === 200) { // OK
+            const responseData = await response.json() as XReplaySuccessResponse;
+            console.log(`[DEBUG] X API Replay request successful for webhook ${webhookId}. Job ID: ${responseData?.data?.job_id}`);
+            return jsonResponse(200, responseData, req.method, url.pathname); // Forward X API's response
+        }
+        
+        // Handle X API errors
+        let errorDetails = `Failed to request replay for webhook ${webhookId}.`;
+        let errorDataForClient = { error: "X API Error during replay request.", details: errorDetails };
+        try {
+            const twitterErrorData = await response.json() as any;
+            errorDetails = twitterErrorData.title || twitterErrorData.detail || JSON.stringify(twitterErrorData);
+            errorDataForClient.details = twitterErrorData; // Send the whole X error object
+        } catch (e) {
+            const textDetails = await response.text();
+            errorDetails = textDetails || response.statusText;
+            errorDataForClient.details = errorDetails;
+        }
+        console.error(`X API Replay Error: ${response.status}`, errorDetails);
+        return jsonResponse(response.status, errorDataForClient, req.method, url.pathname);
+
+    } catch (error) {
+        // No SyntaxError check needed here as we are not parsing a request body
+        console.error("Error processing replay request (POST /api/webhooks/:id/replay):", error);
+        return jsonResponse(500, { error: "Internal server error while requesting event replay." }, req.method, url.pathname);
+    }
+}
+
 export async function handleWebhookRoutes(req: Request, url: URL): Promise<Response | null> {
     if (!url.pathname.startsWith("/api/webhooks")) {
         return null; // Not a webhook route
@@ -190,6 +278,18 @@ export async function handleWebhookRoutes(req: Request, url: URL): Promise<Respo
         if (req.method === "DELETE") {
             return deleteWebhook(req, url, primaryId);
         }
+    }
+    
+    // POST /api/webhooks/:webhookId/replay
+    const replayMatch = url.pathname.match(/^\/api\/webhooks\/([a-zA-Z0-9_]+)\/replay$/);
+    if (replayMatch && req.method === 'POST') {
+        const webhookId = replayMatch[1];
+        if (typeof webhookId === 'string') {
+            return replayWebhookEvents(req, url, webhookId);
+        }
+        // Fallback or error if webhookId is not captured, though unlikely with this regex
+        console.error("[ROUTE_ERROR] Webhook ID not found in replay path despite match.", url.pathname);
+        return jsonResponse(400, { error: "Invalid webhook ID in path for replay." }, req.method, url.pathname);
     }
     
     return null; 

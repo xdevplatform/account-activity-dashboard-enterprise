@@ -1,7 +1,7 @@
 import { serve, type ServerWebSocket } from "bun";
 import { handleWebhookRoutes } from "./src/routes/webhookRoutes"; // Import the new handler
 import { handleUserRoutes } from "./src/routes/userRoutes"; // Import the new user route handler
-import { handleTwitterEventRoutes } from "./src/routes/twitterEventRoutes"; // Import the Twitter event handler
+import { handleXEventRoutes } from "./src/routes/xEventRoutes"; // Import the X event handler
 import path from "node:path"; // For path joining
 
 const projectRoot = import.meta.dir;
@@ -53,10 +53,10 @@ serve({
       return userResponse;
     }
 
-    // Handle /webhooks/twitter for incoming Twitter events (CRC & POST)
-    const twitterEventResponse = await handleTwitterEventRoutes(req, url, broadcastToLiveEventClients);
-    if (twitterEventResponse) {
-      return twitterEventResponse;
+    // Handle /webhooks/twitter for incoming X events (CRC & POST)
+    const xEventResponse = await handleXEventRoutes(req, url, broadcastToLiveEventClients);
+    if (xEventResponse) {
+      return xEventResponse;
     }
 
     // Static file serving from /public
