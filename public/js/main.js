@@ -2,6 +2,7 @@ let currentOpenTab = 'webhooks'; // Default tab
 let lastSelectedWebhookIdForSubscriptions = null; // Store the last selected webhook ID
 let cachedWebhooksData = null; // For client-side caching of webhooks
 let currentReplayWebhookId = null; // Store webhook ID for replay modal
+let currentValidateWebhookId = null; // Store webhook ID for validation modal
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[MainJS_Debug] DOMContentLoaded event fired.");
@@ -152,13 +153,17 @@ function renderWebhooksList(webhooksArray) {
             const createdAt = new Date(webhook.created_at).toUTCString().replace('GMT', 'UTC');
             const isValid = webhook.valid ? 'Yes' : 'No';
             listItem.innerHTML = `
-                <button class="delete-webhook-btn" onclick="confirmDeleteWebhook('${webhook.id}', '${webhook.url}')">Delete</button>
-                <button class="validate-webhook-btn" onclick="handleValidateWebhook(this, '${webhook.id}')">Validate</button>
-                <button class="replay-webhook-btn" onclick="showReplayModal('${webhook.id}')">Replay Events</button>
-                <p><strong>ID:</strong> <span class="code-block-value">${webhook.id}</span></p>
-                <p><strong>URL:</strong> <span class="code-block-value"><a href="${webhook.url}" target="_blank">${webhook.url}</a></span></p>
-                <p><strong>Created At:</strong> <span class="code-block-value">${createdAt}</span></p>
-                <p><strong>Valid:</strong> <span class="code-block-value">${isValid}</span></p>
+                <div class="webhook-card-content">
+                    <p><strong>ID:</strong> <span class="code-block-value">${webhook.id}</span></p>
+                    <p><strong>URL:</strong> <span class="code-block-value"><a href="${webhook.url}" target="_blank">${webhook.url}</a></span></p>
+                    <p><strong>Created At:</strong> <span class="code-block-value">${createdAt}</span></p>
+                    <p><strong>Valid:</strong> <span class="code-block-value">${isValid}</span></p>
+                </div>
+                <div class="webhook-card-actions">
+                    <button class="replay-webhook-btn" onclick="showReplayModal('${webhook.id}')" aria-label="Replay Events" title="Create Replay Job"><img src="/public/img/icons/replay-icon.svg" alt="Replay"></button>
+                    <button class="validate-webhook-btn" onclick="showValidateWebhookModal('${webhook.id}')" aria-label="Validate Webhook" title="Validate CRC Check"><img src="/public/img/icons/validate-icon.svg" alt="Validate"></button>
+                    <button class="delete-webhook-btn" onclick="confirmDeleteWebhook('${webhook.id}', '${webhook.url}')" aria-label="Delete Webhook" title="Delete Webhook"><img src="/public/img/icons/delete-icon.svg" alt="Delete"></button>
+                </div>
             `;
             listElement.appendChild(listItem);
         });
@@ -318,46 +323,6 @@ async function confirmDeleteWebhook(webhookId, webhookUrl) {
             errorElement.style.display = 'block';
         }
         alert(`Failed to delete webhook: ${err.message}`);
-    }
-}
-
-async function handleValidateWebhook(buttonElement, webhookId) {
-    const originalButtonText = buttonElement.textContent;
-    buttonElement.textContent = 'Validating...';
-    buttonElement.disabled = true;
-    try {
-        const response = await fetch(`/api/webhooks/${webhookId}`, {
-            method: 'PUT',
-        });
-        if (response.status === 204) {
-            alert(`Validation request sent successfully for webhook ID: ${webhookId}.\nCheck your server logs for CRC activity and refresh the list to see updated status eventually.`);
-            fetchWebhooks(true);
-        } else if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Failed to parse server error response for validation' }));
-            let finalDetailMessage = 'Failed to send validation request.';
-            if (errorData.details) {
-                const twitterError = errorData.details;
-                if (typeof twitterError === 'object' && twitterError !== null) {
-                    if (twitterError.errors && twitterError.errors.length > 0 && twitterError.errors[0].message) {
-                        finalDetailMessage = twitterError.errors[0].message;
-                    } else if (twitterError.title) {
-                        finalDetailMessage = twitterError.title + (twitterError.detail ? `: ${twitterError.detail}` : '');
-                    } else if (twitterError.detail) {
-                        finalDetailMessage = twitterError.detail;
-                    } else { finalDetailMessage = JSON.stringify(twitterError); }
-                } else if (typeof twitterError === 'string') { finalDetailMessage = twitterError; }
-            } else if (errorData.error) { finalDetailMessage = errorData.error; }
-             else if (errorData.message) { finalDetailMessage = errorData.message; }
-            alert(`Error ${response.status}: ${finalDetailMessage}`);
-        } else {
-            alert(`Unexpected response status ${response.status} while sending validation request.`);
-        }
-    } catch (err) {
-        console.error("Failed to send validation request:", err);
-        alert(`Failed to send validation request: ${err.message}`);
-    } finally {
-        buttonElement.textContent = originalButtonText;
-        buttonElement.disabled = false;
     }
 }
 
@@ -602,5 +567,96 @@ async function handleConfirmReplay() {
     } catch (err) {
         console.error("Failed to send replay request:", err);
         messageElement.textContent = `Failed to send replay request: ${err.message}`;
+    }
+}
+
+// --- Validate Webhook Modal Functions ---
+function showValidateWebhookModal(webhookId) {
+    currentValidateWebhookId = webhookId;
+    const modal = document.getElementById('validate-webhook-modal');
+    const messageElement = document.getElementById('validate-webhook-message');
+    const statusContainer = document.getElementById('validate-webhook-status-container');
+    const confirmButton = document.getElementById('confirm-validate-webhook-btn');
+
+    if (messageElement) messageElement.textContent = '';
+    if (statusContainer) statusContainer.innerHTML = ''; // Clear previous status/animation
+    if (confirmButton) confirmButton.disabled = false; // Ensure button is enabled
+
+    if (modal) {
+        modal.style.display = 'block';
+    }
+    console.log(`[MainJS] Show validate webhook modal for webhook ID: ${webhookId}`);
+}
+
+function closeValidateWebhookModal() {
+    const modal = document.getElementById('validate-webhook-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    const messageElement = document.getElementById('validate-webhook-message');
+    if (messageElement) messageElement.textContent = ''; // Clear messages on close
+    const statusContainer = document.getElementById('validate-webhook-status-container');
+    if (statusContainer) statusContainer.innerHTML = ''; // Clear status/animation
+
+    currentValidateWebhookId = null;
+    console.log('[MainJS] Validate webhook modal closed.');
+}
+
+async function handleConfirmValidateWebhook() {
+    if (!currentValidateWebhookId) {
+        alert("Error: No webhook ID available for validation.");
+        return;
+    }
+
+    const messageElement = document.getElementById('validate-webhook-message');
+    const statusContainer = document.getElementById('validate-webhook-status-container');
+    const confirmButton = document.getElementById('confirm-validate-webhook-btn');
+
+    if (!messageElement || !statusContainer || !confirmButton) {
+        alert("Error: Modal elements not found for validation status.");
+        return;
+    }
+
+    messageElement.textContent = '';
+    messageElement.style.color = 'red'; // Default to red for errors
+    statusContainer.innerHTML = '<div class="modal-spinner"></div> Validating...'; // Placeholder for animation
+    confirmButton.disabled = true;
+
+    try {
+        const response = await fetch(`/api/webhooks/${currentValidateWebhookId}`, {
+            method: 'PUT',
+        });
+
+        statusContainer.innerHTML = ''; // Clear spinner
+
+        if (response.status === 204) {
+            messageElement.textContent = `Validation request sent successfully for webhook ID: ${currentValidateWebhookId}. Check server logs and refresh list.`;
+            messageElement.style.color = 'green';
+            fetchWebhooks(true); // Refresh the webhooks list
+            setTimeout(closeValidateWebhookModal, 3000); // Close modal after 3 seconds
+        } else {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to parse server error response for validation' }));
+            let finalDetailMessage = 'Failed to send validation request.';
+            if (errorData.details) {
+                const twitterError = errorData.details;
+                if (typeof twitterError === 'object' && twitterError !== null) {
+                    if (twitterError.errors && twitterError.errors.length > 0 && twitterError.errors[0].message) {
+                        finalDetailMessage = twitterError.errors[0].message;
+                    } else if (twitterError.title) {
+                        finalDetailMessage = twitterError.title + (twitterError.detail ? `: ${twitterError.detail}` : '');
+                    } else if (twitterError.detail) {
+                        finalDetailMessage = twitterError.detail;
+                    } else { finalDetailMessage = JSON.stringify(twitterError); }
+                } else if (typeof twitterError === 'string') { finalDetailMessage = twitterError; }
+            } else if (errorData.error) { finalDetailMessage = errorData.error; }
+             else if (errorData.message) { finalDetailMessage = errorData.message; }
+            messageElement.textContent = `Error ${response.status}: ${finalDetailMessage}`;
+            confirmButton.disabled = false; // Re-enable button on error
+        }
+    } catch (err) {
+        console.error("Failed to send validation request:", err);
+        statusContainer.innerHTML = ''; // Clear spinner
+        messageElement.textContent = `Failed to send validation request: ${err.message}`;
+        confirmButton.disabled = false; // Re-enable button on error
     }
 } 

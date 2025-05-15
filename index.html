@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Activity Dashboard</title>
     <link rel="stylesheet" href="/public/css/style.css">
+    <link rel="stylesheet" href="/public/css/webhooks.css">
+    <link rel="stylesheet" href="/public/css/subscriptions.css">
+    <link rel="stylesheet" href="/public/css/live-events.css">
 </head>
 <body>
     <div class="navbar">
@@ -114,18 +117,35 @@
     <div id="replay-events-modal" class="modal">
         <div class="modal-content replay-modal-content">
             <span class="close-button" onclick="closeReplayModal()">&times;</span>
-            <h3>Replay Events for Webhook</h3>
-            <p>Select the time frame (in your local time) to replay events. Dates must be within the last 15 days.</p>
+            <h3>Create Replay Job</h3>
+            <p>Select the start and end date/time (local) for replaying events for this webhook. Events can be replayed from the last 15 days.</p>
             <div class="form-group">
-                <label for="replay-from-datetime">From (Local Time):</label>
+                <label for="replay-from-datetime">From:</label>
                 <input type="datetime-local" id="replay-from-datetime" name="replay-from-datetime">
             </div>
             <div class="form-group">
-                <label for="replay-to-datetime">To (Local Time):</label>
+                <label for="replay-to-datetime">To:</label>
                 <input type="datetime-local" id="replay-to-datetime" name="replay-to-datetime">
             </div>
-            <button id="confirm-replay-btn" onclick="handleConfirmReplay()" class="modal-button">Confirm Replay</button>
-            <div id="replay-message" class="modal-message"></div>
+            <button onclick="handleConfirmReplay()" class="modal-button">Confirm Replay</button>
+            <p id="replay-message" class="modal-message"></p>
+        </div>
+    </div>
+
+    <!-- Validate Webhook Modal -->
+    <div id="validate-webhook-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeValidateWebhookModal()">&times;</span>
+            <h3>Confirm Webhook Validation</h3>
+            <p>Are you sure you want to send a CRC validation request to this webhook endpoint? Ensure your endpoint is ready to handle the CRC check.</p>
+            <div id="validate-webhook-status-container">
+                <!-- Animation and messages will go here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="handleConfirmValidateWebhook()" id="confirm-validate-webhook-btn" class="modal-button">Confirm Validation</button>
+                <button onclick="closeValidateWebhookModal()" class="modal-button-cancel">Cancel</button>
+            </div>
+            <p id="validate-webhook-message" class="modal-message"></p>
         </div>
     </div>
 

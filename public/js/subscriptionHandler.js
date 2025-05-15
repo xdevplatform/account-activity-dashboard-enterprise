@@ -49,7 +49,9 @@ function renderSubscriptionCards(webhookId, subscriptionsArray) {
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-subscription-btn';
-        deleteButton.textContent = 'Delete';
+        deleteButton.innerHTML = '<img src="/public/img/icons/delete-icon.svg" alt="Delete">';
+        deleteButton.setAttribute('aria-label', 'Delete Subscription');
+        deleteButton.setAttribute('title', 'Delete Subscription');
         deleteButton.onclick = () => confirmDeleteSubscription(webhookId, subscription.id);
 
         const contentDiv = document.createElement('div');

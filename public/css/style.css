@@ -52,8 +52,9 @@ body { font-family: sans-serif; margin: 0; }
     padding: 15px;
     border-radius: 5px;
     background-color: #f9f9f9;
-    text-align: left; 
-    overflow: hidden; /* To contain floated buttons */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 #webhooks-list li p {
     margin: 5px 0;
@@ -63,40 +64,98 @@ body { font-family: sans-serif; margin: 0; }
     width: 120px; 
 }
 
+.webhook-card-content {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.webhook-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    flex-shrink: 0;
+}
+
+.webhook-card-actions button img {
+    display: block; /* Remove extra space below image */
+    width: 16px; /* Desired icon width */
+    height: 16px; /* Desired icon height */
+}
+
 .delete-webhook-btn {
-    background-color: #f44336; 
-    color: white;
-    border: none;
-    padding: 8px 12px;
+    background-color: transparent; 
+    /* color: #f44336; Removed as SVG has its own color or will be styled */
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; /* Adjust padding for icon */
     text-align: center;
     text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
+    display: inline-flex; /* Use inline-flex to center SVG */
+    align-items: center; /* Center SVG vertically */
+    justify-content: center; /* Center SVG horizontally */
+    /* font-size: 16px; Removed as it's an image now */
     border-radius: 4px;
     cursor: pointer;
-    float: right; 
-    margin-left: 10px;
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; /* Button width (16px icon + 5px padding*2 + 1px border*2 approx) */
+    height: 28px; /* Button height */
 }
 .delete-webhook-btn:hover {
-    background-color: #da190b;
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
 }
 
 .validate-webhook-btn {
-    background-color: #2196F3; 
-    color: white;
-    border: none;
-    padding: 8px 12px;
+    background-color: transparent; 
+    /* color: #2196F3; Removed */
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
     text-align: center;
     text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    /* font-size: 16px; Removed */
     border-radius: 4px;
     cursor: pointer;
-    float: right;
-    margin-left: 10px; 
+    margin-left: 5px; 
+    margin-bottom: 0; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+    position: relative; /* Added for spinner positioning context */
 }
 .validate-webhook-btn:hover {
-    background-color: #0b7dda;
+    background-color: rgba(33, 150, 243, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+/* Styles for the new Replay button on webhook cards */
+.replay-webhook-btn {
+    background-color: transparent; 
+    /* color: #28a745; Removed */
+    border: 1px solid #6c757d; /* Gray outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    /* font-size: 16px; Removed */
+    margin-left: 0; 
+    margin-bottom: 0; 
+    cursor: pointer;
+    border-radius: 3px; 
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+}
+
+.replay-webhook-btn:hover {
+    background-color: rgba(40, 167, 69, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
 }
 
 .navbar-brand-spacer {
@@ -205,23 +264,32 @@ body { font-family: sans-serif; margin: 0; }
 
 /* Styling for the Delete Subscription button */
 .delete-subscription-btn {
-    background-color: #f44336; /* Red */
-    color: white;
-    border: none;
-    padding: 6px 10px; /* Slightly smaller than webhook buttons */
+    background-color: transparent; 
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; /* Adjust padding for icon */
     text-align: center;
     text-decoration: none;
-    display: inline-block;
-    font-size: 0.85em; /* Slightly smaller font */
+    display: inline-flex; /* Use inline-flex to center SVG */
+    align-items: center; /* Center SVG vertically */
+    justify-content: center; /* Center SVG horizontally */
     border-radius: 4px;
     cursor: pointer;
     float: right; 
     margin-left: 10px;
-    /* margin-top: -2px; /* Optional: align better with the text line if needed */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; /* Button width */
+    height: 28px; /* Button height */
 }
 
 .delete-subscription-btn:hover {
-    background-color: #da190b; /* Darker red */
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly more opaque tint */
+    transform: scale(1.1); /* Subtle scale up */
+}
+
+.delete-subscription-btn img {
+    display: block; /* Remove extra space below image */
+    width: 16px; /* Icon width */
+    height: 16px; /* Icon height */
 }
 
 .avatar-img {
@@ -237,7 +305,6 @@ body { font-family: sans-serif; margin: 0; }
 .user-card-layout {
     display: flex;
     align-items: center; /* Vertically center items */
-    margin-top: 5px; /* Decreased from 10px */
 }
 
 .user-avatar-container {
@@ -476,26 +543,26 @@ body { font-family: sans-serif; margin: 0; }
     text-decoration: underline;
 } 
 
-/* General Modal Styles (can be reused or specified if unique ones are needed) */
+/* General Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 10% auto; /* 10% from the top and centered */
+    margin: 10% auto; 
     padding: 25px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-    max-width: 500px; /* Maximum width */
+    width: 80%; 
+    max-width: 500px; 
     border-radius: 8px;
     position: relative;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
@@ -543,7 +610,7 @@ body { font-family: sans-serif; margin: 0; }
 }
 
 .modal .form-group input[type="datetime-local"] {
-    width: calc(100% - 16px); /* Account for padding */
+    width: calc(100% - 16px); 
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -568,28 +635,80 @@ body { font-family: sans-serif; margin: 0; }
 .modal-message {
     margin-top: 15px;
     font-size: 0.9em;
-    min-height: 20px; /* Reserve space for messages */
+    min-height: 20px; 
 }
 
-/* Specific class for replay modal content if needed, but generic .modal-content should be fine */
-.replay-modal-content {}
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end; 
+    gap: 10px; 
+}
 
-/* Styles for the new Replay button on webhook cards */
-.replay-webhook-btn {
-    background-color: #28a745; /* Green */
+.modal-button-cancel {
+    background-color: #6c757d; 
     color: white;
+    padding: 10px 15px;
     border: none;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 0.8em;
-    margin: 0 5px 5px 0;
+    border-radius: 4px;
     cursor: pointer;
-    border-radius: 3px;
+    font-size: 1em;
     transition: background-color 0.2s ease-in-out;
 }
 
-.replay-webhook-btn:hover {
-    background-color: #218838;
+.modal-button-cancel:hover {
+    background-color: #5a6268;
+}
+
+.modal-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #007bff; 
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+}
+
+.replay-modal-content {}
+
+/* CSS Spinner animation keyframes */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* General button loading (if an icon is hidden and spinner shown on button itself) */
+.button-loading img {
+    visibility: hidden;
+}
+
+.button-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px; 
+    height: 16px; 
+    box-sizing: border-box; 
+    transform: translate(-50%, -50%); 
+    border: 2px solid rgba(0, 0, 0, 0.1); 
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Commented out as it was specific and the button itself no longer shows spinner */
+/* .validate-webhook-btn.button-loading::after { */
+    /* border-left-color: #2196F3; */ 
+/* } */
+
+/* Styles for the status container within the validation modal */
+#validate-webhook-status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px; /* Give it some space */
+    margin: 15px 0;
+    font-size: 0.9em;
 } 
