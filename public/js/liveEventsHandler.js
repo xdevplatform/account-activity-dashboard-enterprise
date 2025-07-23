@@ -202,7 +202,7 @@ function initializeLiveEvents() {
     }
 
     // Determine WebSocket protocol (ws or wss)
-    const wsProtocol = window.location.protocol === 'https:s' ? 'wss:' : 'ws:';
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${window.location.host}/ws/live-events`;
 
     liveEventsSocket = new WebSocket(wsUrl);
