@@ -1,0 +1,178 @@
+/* Styling for Subscriptions List - similar to Webhooks List */
+#subscriptions-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 900px;
+}
+
+#subscriptions-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left; 
+    overflow: hidden; 
+    min-width: 450px; 
+}
+
+#subscriptions-list li p {
+    margin: 5px 0;
+}
+
+#subscriptions-list li strong {
+    display: inline-block;
+    width: auto; 
+    margin-right: 10px; 
+}
+
+/* Styling for the Delete Subscription button */
+.delete-subscription-btn {
+    background-color: transparent; 
+    border: 1px solid #f44336; /* Red outline */
+    padding: 5px; 
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 4px;
+    cursor: pointer;
+    float: right; 
+    margin-left: 10px;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 28px; 
+    height: 28px; 
+}
+
+.delete-subscription-btn:hover {
+    background-color: rgba(244, 67, 54, 0.15); 
+    transform: scale(1.1); 
+}
+
+.delete-subscription-btn img {
+    display: block; 
+    width: 16px; 
+    height: 16px; 
+}
+
+.avatar-img {
+    width: 48px; 
+    height: 48px;
+    border-radius: 50%; 
+    border: 1px solid #ddd;
+    vertical-align: middle; 
+    margin-top: 5px;
+} 
+
+/* New styles for user card layout */
+.user-card-layout {
+    display: flex;
+    align-items: center; 
+}
+
+.user-avatar-container {
+    flex-shrink: 0; 
+    margin-right: 15px; 
+}
+
+.user-avatar-container .avatar-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    display: block; 
+}
+
+.avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: #777;
+}
+
+.user-info-container {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column; 
+    justify-content: center; 
+}
+
+.user-info-container p {
+    margin: 1px 0; 
+}
+
+.user-info-container .user-handle {
+    font-weight: bold;
+    font-size: 1.1em; 
+    color: #333;
+    margin-bottom: 2px; 
+}
+
+.user-info-container .user-id-subtext {
+    font-size: 0.85em; 
+    color: #666; 
+    margin-top: 0;
+}
+
+.user-details-placeholder {
+    /* If it had any specific styling that conflicted, reset or adjust here */
+}
+
+/* Adjustments to subscription list item if needed */
+/* #subscriptions-list li .user-details-placeholder + div { */
+    /* clear: both; */ 
+/* } */
+
+/* #subscriptions-list li strong { */
+    /* margin-right: 5px; */ 
+/* } */ 
+
+#rules-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 80%; 
+    max-width: 1200px;
+}
+
+#rules-list li {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#rules-list li p {
+    margin: 5px 0;
+}
+
+#rules-list li strong {
+    display: inline-block;
+    width: 120px; 
+}
+
+.rule-card-content {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.rule-card-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+    flex-shrink: 0;
+} 

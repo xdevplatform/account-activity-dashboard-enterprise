@@ -242,6 +242,37 @@ async function replayWebhookEvents(req: Request, url: URL, webhookId: string): P
     }
 }
 
+async function subscribeWebhookToFilteredStream(req: Request, url: URL, webhookId: string): Promise<Response> {
+    const bearerToken = process.env.X_BEARER_TOKEN;
+    if (!bearerToken) {
+        console.error(`X_BEARER_TOKEN not found for POST /api/webhooks/${webhookId}/filteredstream.`);
+        return jsonResponse(500, { error: "Server configuration error: Missing API token." }, req.method, url.pathname);
+    }
+
+    const twitterApiUrl = `https://api.twitter.com/2/tweets/search/webhooks/${webhookId}`;
+    console.log(`[DEBUG] Subscribing webhook to filtered stream: ${twitterApiUrl}`);
+
+    try {
+        const response = await fetch(twitterApiUrl, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${bearerToken}`,
+            },
+        });
+
+        if (response.ok) {
+            return jsonResponse(200, { message: "Webhook subscribed to filtered stream successfully." }, req.method, url.pathname);
+        } else {
+            const errorData = await response.json();
+            console.error(`Twitter API POST Subscribe Error: ${response.status} ${response.statusText}`, errorData);
+            return jsonResponse(response.status, { error: "Failed to subscribe webhook to filtered stream.", details: errorData }, req.method, url.pathname);
+        }
+    } catch (error) {
+        console.error(`Error subscribing webhook ${webhookId} to filtered stream:`, error);
+        return jsonResponse(500, { error: "Internal server error while subscribing webhook." }, req.method, url.pathname);
+    }
+}
+
 export async function handleWebhookRoutes(req: Request, url: URL): Promise<Response | null> {
     if (!url.pathname.startsWith("/api/webhooks")) {
         return null; // Not a webhook route
@@ -283,14 +314,16 @@ export async function handleWebhookRoutes(req: Request, url: URL): Promise<Respo
     // POST /api/webhooks/:webhookId/replay
     const replayMatch = url.pathname.match(/^\/api\/webhooks\/([a-zA-Z0-9_]+)\/replay$/);
     if (replayMatch && req.method === 'POST') {
-        const webhookId = replayMatch[1];
-        if (typeof webhookId === 'string') {
-            return replayWebhookEvents(req, url, webhookId);
-        }
-        // Fallback or error if webhookId is not captured, though unlikely with this regex
-        console.error("[ROUTE_ERROR] Webhook ID not found in replay path despite match.", url.pathname);
-        return jsonResponse(400, { error: "Invalid webhook ID in path for replay." }, req.method, url.pathname);
+        const webhookIdForReplay = replayMatch[1];
+        return replayWebhookEvents(req, url, webhookIdForReplay);
     }
-    
-    return null; 
+
+    // POST /api/webhooks/:webhookId/filteredstream
+    const filteredStreamMatch = url.pathname.match(/^\/api\/webhooks\/([a-zA-Z0-9_]+)\/filteredstream$/);
+    if (filteredStreamMatch && req.method === 'POST') {
+        const webhookIdForSubscribe = filteredStreamMatch[1];
+        return subscribeWebhookToFilteredStream(req, url, webhookIdForSubscribe);
+    }
+
+    return null; // No match
 } 

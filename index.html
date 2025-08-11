@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/webhooks.css">
     <link rel="stylesheet" href="/public/css/subscriptions.css">
+    <link rel="stylesheet" href="/public/css/filteredstream.css">
     <link rel="stylesheet" href="/public/css/live-events.css">
 </head>
 <body>
@@ -16,7 +17,8 @@
         </div>
         <div class="nav-links">
             <a href="#webhooks" data-tab="webhooks">Webhooks</a>
-            <a href="#subscriptions" data-tab="subscriptions">Subscriptions</a>
+            <a href="#subscriptions" data-tab="subscriptions">Account Activity API</a>
+            <a href="#filteredstream" data-tab="filteredstream">Filtered Stream</a>
             <a href="#live-events" data-tab="live-events">Live Events</a>
         </div>
         <div class="navbar-brand-spacer">
@@ -72,6 +74,34 @@
                 <div id="add-subscription-message" style="margin-top: 10px;"></div>
             </div>
 
+        </div>
+    </div>
+
+    <div id="filteredstream" class="tabcontent">
+        <div class="tabcontent-centered">
+            <h2>Filtered Stream Rules</h2>
+            <p>Manage your Filtered Stream rules.</p>
+
+            <div id="webhook-selector-container" style="margin-bottom: 20px; width: 80%; max-width: 600px;">
+                <label for="webhook-select-for-filteredstream" style="display: block; margin-bottom: 5px; text-align: left; font-weight: bold;">Select Webhook:</label>
+                <select id="webhook-select-for-filteredstream" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="">Loading webhooks...</option>
+                </select>
+                <div id="webhook-select-error" style="color: red; margin-top: 5px; text-align: left;"></div>
+            </div>
+
+            <p>The ruleset is account-wide. Subscribing a webhook will make it receive realtime events matching the rules below.</p>
+            <button id="subscribe-webhook-btn">Subscribe Webhook</button>
+            <div id="subscribe-message" style="margin-top: 10px;"></div>
+
+            <div class="rules-actions">
+                <button id="refresh-rules-btn">Refresh List</button>
+            </div>
+            <div id="rules-loading" style="display: none;">Loading rules...</div>
+            <ul id="rules-list"></ul>
+            <div id="rules-error" style="display: none; color: red;"></div>
+
+            <!-- Add form if needed in future -->
         </div>
     </div>
 
@@ -151,6 +181,7 @@
 
     <script src="/public/js/main.js"></script>
     <script src="/public/js/subscriptionHandler.js"></script>
+    <script src="/public/js/filteredstreamHandler.js"></script>
     <script src="/public/js/liveEventsHandler.js"></script>
 </body>
 </html> 

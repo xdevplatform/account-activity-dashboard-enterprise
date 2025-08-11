@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Event listener for the new Refresh Rules button
+    const refreshRulesBtn = document.getElementById('refresh-rules-btn');
+    if (refreshRulesBtn) {
+        refreshRulesBtn.addEventListener('click', () => {
+            console.log("[MainJS_Debug] Refresh Rules button clicked.");
+            fetchRules(true); // Force a refresh
+        });
+    }
+
     // Handle initial tab based on hash or default
     console.log("[MainJS_Debug] About to call handleHashChange for initial load.");
     handleHashChange();
@@ -125,6 +134,8 @@ function showTab(tabId) {
         if (typeof fetchWebhooks === 'function') fetchWebhooks();
     } else if (tabId === 'subscriptions') {
         if (typeof initializeSubscriptionsPage === 'function') initializeSubscriptionsPage();
+    } else if (tabId === 'filteredstream') {
+        if (typeof initializeFilteredStreamPage === 'function') initializeFilteredStreamPage();
     } else if (tabId === 'live-events') {
         if (typeof window.initializeLiveEvents === 'function') {
             console.log("[MainJS_Debug] LiveEvents tab is active. Initializing WebSocket connection.");
@@ -371,6 +382,57 @@ async function populateWebhookDropdownForSubscriptions() {
         }
     } catch (err) {
         console.error("Failed to populate webhook dropdown for subscriptions:", err);
+        errorElement.textContent = err.message || 'An unexpected error occurred while loading webhooks.';
+        selectElement.innerHTML = '<option value="">Error loading webhooks</option>';
+    } finally {
+        selectElement.disabled = false;
+    }
+}
+
+async function populateWebhookDropdownForFilteredStream() {
+    const selectElement = document.getElementById('webhook-select-for-filteredstream');
+    const errorElement = document.getElementById('webhook-select-error');
+
+    if (!selectElement || !errorElement) {
+        console.error("Filtered Stream page webhook select or error element not found.");
+        return;
+    }
+
+    selectElement.innerHTML = '<option value="">Loading webhooks...</option>';
+    selectElement.disabled = true;
+    errorElement.textContent = '';
+
+    try {
+        const response = await fetch('/api/webhooks');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to parse webhook list for dropdown' }));
+            throw new Error(`Error ${response.status}: ${errorData.error || errorData.details?.title || errorData.details?.detail || errorData.message || 'Failed to fetch webhooks for dropdown'}`);
+        }
+        const result = await response.json();
+
+        selectElement.innerHTML = ''; // Clear loading message
+
+        if (result.data && result.data.length > 0) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "-- Select a Webhook --";
+            selectElement.appendChild(defaultOption);
+
+            result.data.forEach(webhook => {
+                const option = document.createElement('option');
+                option.value = webhook.id;
+                const displayUrl = webhook.url.length > 50 ? webhook.url.substring(0, 47) + "..." : webhook.url;
+                option.textContent = `ID: ${webhook.id} (Url: ${displayUrl})`;
+                selectElement.appendChild(option);
+            });
+        } else {
+            const noWebhooksOption = document.createElement('option');
+            noWebhooksOption.value = "";
+            noWebhooksOption.textContent = "No webhooks registered. Please add one first.";
+            selectElement.appendChild(noWebhooksOption);
+        }
+    } catch (err) {
+        console.error("Failed to populate webhook dropdown for filtered stream:", err);
         errorElement.textContent = err.message || 'An unexpected error occurred while loading webhooks.';
         selectElement.innerHTML = '<option value="">Error loading webhooks</option>';
     } finally {

@@ -2,6 +2,7 @@ import { serve, type ServerWebSocket } from "bun";
 import { handleWebhookRoutes } from "./src/routes/webhookRoutes"; // Import the new handler
 import { handleUserRoutes } from "./src/routes/userRoutes"; // Import the new user route handler
 import { handleXEventRoutes } from "./src/routes/xEventRoutes"; // Import the X event handler
+import { handleFilteredStreamRoutes } from "./src/routes/filteredstreamRoutes"; // Import the filtered stream handler
 import path from "node:path"; // For path joining
 
 const projectRoot = import.meta.dir;
@@ -51,6 +52,12 @@ serve({
     const userResponse = await handleUserRoutes(req, url);
     if (userResponse) {
       return userResponse;
+    }
+
+    // Handle /api/rules routes for filtered stream
+    const filteredStreamResponse = await handleFilteredStreamRoutes(req, url);
+    if (filteredStreamResponse) {
+      return filteredStreamResponse;
     }
 
     // Handle /webhooks/twitter for incoming X events (CRC & POST)
